@@ -1,0 +1,225 @@
+/* ============================================================
+   RASHID — "TERMINAL DE ENTREGA"
+   Design system próprio. Substitui integralmente os tokens TROX.
+
+   Direção: um terminal de rua de madrugada. Chassi de máquina, chapa
+   chanfrada, faixa de risco, letreiro de neon. A energia vem de dois
+   lugares que qualquer um reconhece na mesa da engenharia às 23h — a
+   pizza e o energético — traduzidos em cor, não em desenhinho:
+   verde ácido de lata, magenta de letreiro, vermelho de calabresa,
+   amarelo de queijo derretido.
+   ============================================================ */
+
+@import url("https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&family=Monoton&family=Share+Tech+Mono&display=swap");
+
+:root {
+    /* -----------------------------------------------------------------
+       1. PALETA — seis cores nomeadas, cada uma com um trabalho
+       ----------------------------------------------------------------- */
+
+    /* Superfícies: preto azulado de rua molhada, nunca preto puro.
+       Tudo opaco — chapa translúcida sobre fundo escuro vira lama. */
+    --void:      #06060c;  /* fundo da página */
+    --chassis:   #0d1019;  /* chapa dos painéis */
+    --chassis-2: #151a29;  /* sulco / campo de input */
+    --edge:      #2b3350;  /* hairline do chassi */
+    --edge-hot:  #46507d;  /* hairline em hover */
+    --dough:     #1b2133;  /* fatia apagada */
+    --slice-a:   #c4145c;  /* fatia ímpar da roleta */
+    --slice-b:   #182136;  /* fatia par da roleta */
+    --slice-c:   #0e6d80;  /* fecha a volta quando o total é ímpar */
+
+    /* Energia: verde ácido de lata — confirmação, "tô dentro", pago */
+    --slime:     #b4ff2e;
+    --slime-dim: #6f9c1c;
+
+    /* Letreiro: magenta — a ação principal, o "racha" */
+    --neon:      #ff2d78;
+    --neon-dim:  #a01048;
+
+    /* Fiação: ciano — links, quem organiza, informação */
+    --wire:      #21e6ff;
+    --wire-dim:  #12798a;
+
+    /* Calabresa: vermelho — destrutivo, cancelar, excluir */
+    --pepperoni: #ff4423;
+
+    /* Queijo: âmbar — pendente, fechado, atenção */
+    --cheese:    #ffc233;
+
+    /* Tinta */
+    --ink:       #dfe3f2;
+    --ink-dim:   #8e93ad;
+    --ink-faint: #565b78;
+
+    /* Apelidos semânticos — usados pela camada de componentes */
+    --bg: var(--void);
+    --panel: var(--chassis);
+    --fg: var(--ink);
+    --muted-fg: var(--ink-dim);
+    --accent: var(--neon);
+    --success: var(--slime);
+    --warning: var(--cheese);
+    --danger: var(--pepperoni);
+    --ring: var(--wire);
+
+    /* -----------------------------------------------------------------
+       2. TIPOGRAFIA — três vozes
+       Monoton só no letreiro (uma palavra na tela inteira);
+       Chakra Petch, angulosa e técnica, carrega tudo que se lê;
+       Share Tech Mono para o que é dado: código PIX, id, hora, dinheiro.
+       ----------------------------------------------------------------- */
+    --font-display: "Monoton", cursive;
+    --font-sans: "Chakra Petch", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "Share Tech Mono", ui-monospace, Menlo, Consolas, monospace;
+
+    --fs-display: 64px;
+    --fs-h1:      44px;
+    --fs-h2:      34px;
+    --fs-h3:      26px;
+    --fs-h4:      19px;
+    --fs-lg:      17px;
+    --fs-body:    15px;
+    --fs-sm:      14px;
+    --fs-xs:      12px;
+    --fs-2xs:     10px;
+
+    --lh-tight:  1.02;
+    --lh-snug:   1.18;
+    --lh-normal: 1.5;
+
+    --fw-light: 300;
+    --fw-regular: 400;
+    --fw-medium: 500;
+    --fw-semibold: 600;
+    --fw-bold: 700;
+
+    --track-tight: -0.01em;
+    --track-wide: 0.14em;
+    --track-x-wide: 0.24em;
+
+    /* -----------------------------------------------------------------
+       3. ESPAÇO / FORMA / LUZ
+       ----------------------------------------------------------------- */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+    --space-16: 64px;
+
+    /* Nada é arredondado: o chassi é cortado. O chanfro é a assinatura
+       geométrica do sistema — canto superior esquerdo e inferior direito.
+       Usado com box-shadow inset no lugar de border, porque clip-path
+       recorta o inset e devolve uma "borda" chanfrada de verdade. */
+    --cut: 10px;
+    --cut-sm: 6px;
+    --chamfer: polygon(
+        var(--cut) 0, 100% 0,
+        100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%,
+        0 100%, 0 var(--cut)
+    );
+    --chamfer-sm: polygon(
+        var(--cut-sm) 0, 100% 0,
+        100% calc(100% - var(--cut-sm)), calc(100% - var(--cut-sm)) 100%,
+        0 100%, 0 var(--cut-sm)
+    );
+
+    /* Glow via filter (drop-shadow segue o recorte; box-shadow externo não) */
+    --glow-neon: drop-shadow(0 0 10px rgb(255 45 120 / 0.55));
+    --glow-slime: drop-shadow(0 0 10px rgb(180 255 46 / 0.45));
+    --glow-wire: drop-shadow(0 0 10px rgb(33 230 255 / 0.45));
+
+    /* Movimento — rápido e seco, de máquina */
+    --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --ease-snap: cubic-bezier(0.16, 1, 0.3, 1);
+    --dur-1: 110ms;
+    --dur-2: 200ms;
+    --dur-3: 340ms;
+}
+
+/* -----------------------------------------------------------------
+   4. DEFAULTS DE ELEMENTO
+   ----------------------------------------------------------------- */
+html {
+    font-family: var(--font-sans);
+    color: var(--fg);
+    background: var(--bg);
+    color-scheme: dark;
+    accent-color: var(--slime);
+}
+body {
+    font-size: var(--fs-body);
+    line-height: var(--lh-normal);
+    font-weight: var(--fw-regular);
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, .h1 {
+    font-size: var(--fs-h1);
+    line-height: var(--lh-tight);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--track-tight);
+    text-transform: uppercase;
+    text-wrap: balance;
+}
+h2, .h2 {
+    font-size: var(--fs-h2);
+    line-height: var(--lh-snug);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--track-tight);
+    text-wrap: balance;
+}
+h3, .h3 {
+    font-size: var(--fs-h3);
+    line-height: var(--lh-snug);
+    font-weight: var(--fw-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+}
+h4, .h4 {
+    font-size: var(--fs-h4);
+    line-height: var(--lh-snug);
+    font-weight: var(--fw-semibold);
+}
+p, .body { font-size: var(--fs-body); line-height: var(--lh-normal); text-wrap: pretty; }
+.body-lg { font-size: var(--fs-lg); line-height: var(--lh-normal); }
+.body-sm { font-size: var(--fs-sm); line-height: var(--lh-normal); }
+.caption { font-size: var(--fs-xs); line-height: var(--lh-normal); color: var(--muted-fg); }
+
+/* Etiqueta de painel: caixa alta, monoespaçada, bem espaçada — o rótulo
+   gravado na chapa acima de cada módulo. */
+.overline {
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    letter-spacing: var(--track-x-wide);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+
+.display {
+    font-size: var(--fs-display);
+    font-weight: var(--fw-bold);
+    line-height: 0.95;
+    letter-spacing: var(--track-tight);
+    text-transform: uppercase;
+}
+
+code, .mono {
+    font-family: var(--font-mono);
+    font-size: 0.95em;
+    color: var(--wire);
+    background: var(--chassis-2);
+    padding: 0.05em 0.35em;
+}
+
+::selection { background: var(--neon); color: #fff; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--edge-hot); }
+::-webkit-scrollbar-thumb:hover { background: var(--wire-dim); }

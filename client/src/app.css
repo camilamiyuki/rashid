@@ -1,0 +1,1049 @@
+/* Rashid — camada de componentes sobre os tokens de theme.css.
+   Regra geométrica única: nada é arredondado, tudo é chanfrado. O contorno
+   de quem é chanfrado vem do par de chapas descrito em "base" — box-shadow
+   inset deixaria justamente os cantos cortados sem contorno. */
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--void); }
+a { color: inherit; text-decoration: none; }
+ul { list-style: none; margin: 0; padding: 0; }
+button { font: inherit; }
+img { max-width: 100%; }
+:focus-visible { outline: 2px solid var(--wire); outline-offset: 2px; }
+
+/* ------------------------------------------------------------ atmosfera
+   Vidro de CRT sujo por cima de tudo: varredura, grão e vinheta. Fica em
+   3–5% de opacidade — some se você olhar de perto, sustenta a cena se não. */
+
+.shell::before,
+.shell::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+}
+.shell::before {
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgb(255 255 255 / 0.035) 0 1px,
+      transparent 1px 3px
+    );
+  animation: scan 8s linear infinite;
+}
+.shell::after {
+  background:
+    radial-gradient(
+      ellipse at 50% 40%,
+      transparent 40%,
+      rgb(0 0 0 / 0.55) 100%
+    );
+}
+
+/* Fundo da página: brilho de letreiro nos cantos + respingo de calabresa. */
+.shell {
+  min-height: 100dvh;
+  position: relative;
+  background:
+    radial-gradient(circle at 12% 0%, rgb(255 45 120 / 0.16), transparent 42%),
+    radial-gradient(circle at 88% 8%, rgb(33 230 255 / 0.12), transparent 40%),
+    radial-gradient(circle at 50% 100%, rgb(180 255 46 / 0.07), transparent 55%),
+    /* calabresa fora de foco, ao fundo */
+    radial-gradient(circle at 16% 64%, rgb(255 68 35 / 0.22), transparent 9%),
+    radial-gradient(circle at 78% 30%, rgb(255 68 35 / 0.16), transparent 7%),
+    radial-gradient(circle at 92% 82%, rgb(255 68 35 / 0.18), transparent 8%),
+    var(--void);
+  background-attachment: fixed;
+}
+
+/* --------------------------------------------------------------- shell */
+
+.shell-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-6);
+  background: rgb(6 6 12 / 0.82);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--edge);
+}
+/* Faixa de risco de máquina: a única listra do sistema. */
+.shell-header::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 3px;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--cheese) 0 6px,
+    transparent 6px 12px
+  );
+  opacity: 0.5;
+}
+
+.brand { display: flex; align-items: baseline; gap: var(--space-2); }
+.brand-name {
+  font-family: var(--font-display);
+  font-size: 26px;
+  line-height: 1;
+  color: var(--neon);
+  text-shadow:
+    0 0 6px rgb(255 45 120 / 0.9),
+    0 0 22px rgb(255 45 120 / 0.5);
+  animation: neon-buzz 6s infinite steps(1);
+}
+.brand-slash {
+  font-family: var(--font-mono);
+  font-size: var(--fs-lg);
+  color: var(--wire);
+}
+.brand-sub {
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--track-x-wide);
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+@media (max-width: 560px) { .brand-sub { display: none; } }
+
+.shell-side { display: flex; align-items: center; gap: var(--space-4); }
+.admin-link {
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding: 3px 8px;
+  background: var(--chassis-2);
+  clip-path: var(--chamfer-sm);
+  transition: color var(--dur-2) var(--ease), background var(--dur-2) var(--ease);
+}
+.admin-link:hover { color: var(--cheese); background: #2a2110; }
+
+.conn-dot {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  background: var(--pepperoni);
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  transition: background var(--dur-2) var(--ease);
+}
+.conn-dot--on { background: var(--slime); }
+.conn-dot--on::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  background: var(--slime);
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  opacity: 0.35;
+  animation: ping 2.2s var(--ease) infinite;
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: var(--space-10) var(--space-4) var(--space-16);
+}
+.container--room { max-width: 1140px; }
+
+/* ---------------------------------------------------------------- base */
+
+/* Contorno que acompanha o chanfro.
+   `box-shadow: inset` NÃO serve aqui: ele desenha o anel no retângulo e o
+   clip-path recorta justamente o trecho que cairia na diagonal, deixando os
+   dois cantos cortados sem contorno. A saída é empilhar duas chapas — o
+   elemento pintado na cor da borda e uma camada 1px menor por dentro com a
+   cor do painel. Como `z-index: -1` pinta depois do fundo do pai e antes do
+   conteúdo, os filhos não precisam saber de nada. */
+.card,
+.gate-card,
+.dlg-content,
+.chat-bubble,
+.org-tag,
+.paid-toggle,
+.choice,
+.btn-ghost,
+.btn-danger-ghost {
+  position: relative;
+  clip-path: var(--o-clip, var(--chamfer));
+  background: var(--o-edge);
+}
+.card::before,
+.gate-card::before,
+.dlg-content::before,
+.chat-bubble::before,
+.org-tag::before,
+.paid-toggle::before,
+.choice::before,
+.btn-ghost::before,
+.btn-danger-ghost::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  clip-path: var(--o-clip, var(--chamfer));
+  background: var(--o-fill);
+  transition: background var(--dur-2) var(--ease);
+}
+
+.card {
+  --o-edge: var(--edge);
+  --o-fill: var(--chassis);
+  padding: var(--space-5) var(--space-6);
+  transition: background var(--dur-2) var(--ease);
+}
+
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 9px var(--space-5);
+  clip-path: var(--chamfer-sm);
+  border: none;
+  background: transparent;
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--dur-2) var(--ease),
+    color var(--dur-2) var(--ease),
+    box-shadow var(--dur-2) var(--ease),
+    filter var(--dur-2) var(--ease),
+    transform var(--dur-1) var(--ease);
+}
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+/* clip-path corta outline, então o foco vira anel interno. */
+.btn:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--wire); }
+.btn-sm { padding: 5px var(--space-3); font-size: var(--fs-xs); }
+
+.btn-accent { background: var(--neon); color: #fff; }
+.btn-accent:hover:not(:disabled) { background: #ff5a95; filter: var(--glow-neon); }
+
+.btn-primary { background: var(--slime); color: #0b1400; }
+.btn-primary:hover:not(:disabled) { background: #c9ff5c; filter: var(--glow-slime); }
+
+.btn-ghost {
+  --o-clip: var(--chamfer-sm);
+  --o-edge: var(--wire-dim);
+  --o-fill: var(--chassis);
+  background: var(--o-edge);
+  color: var(--wire);
+}
+.btn-ghost:hover:not(:disabled) { --o-edge: var(--wire); --o-fill: #123040; color: #fff; }
+
+.btn-danger { background: var(--pepperoni); color: #fff; }
+.btn-danger:hover:not(:disabled) { background: #ff6247; }
+
+.btn-danger-ghost {
+  --o-clip: var(--chamfer-sm);
+  --o-edge: #6d2416;
+  --o-fill: var(--chassis);
+  background: var(--o-edge);
+  color: var(--pepperoni);
+}
+.btn-danger-ghost:hover:not(:disabled) { --o-edge: var(--pepperoni); --o-fill: #2c110b; }
+
+.chip {
+  display: inline-block;
+  padding: 3px 10px;
+  clip-path: var(--chamfer-sm);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.chip--aberto { background: rgb(180 255 46 / 0.14); color: var(--slime); }
+.chip--fechado { background: rgb(255 194 51 / 0.14); color: var(--cheese); }
+.chip--concluido { background: rgb(142 147 173 / 0.12); color: var(--ink-dim); }
+
+.field { display: flex; flex-direction: column; gap: var(--space-2); }
+.field-label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--track-x-wide);
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+/* Campo preenchido, sem contorno: <input> não renderiza ::before, então o
+   truque de duas chapas não se aplica. O foco vira uma barra na base. */
+.input {
+  width: 100%;
+  border: none;
+  background: var(--chassis-2);
+  clip-path: var(--chamfer-sm);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  padding: 10px var(--space-3);
+  transition: box-shadow var(--dur-2) var(--ease);
+}
+.input::placeholder { color: var(--ink-faint); }
+.input:focus {
+  outline: none;
+  background: #1a2336;
+  box-shadow: inset 0 -2px 0 var(--wire);
+}
+
+.input-icon { position: relative; }
+.input-icon svg {
+  position: absolute;
+  left: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--wire);
+  z-index: 1;
+}
+.input-icon .input { padding-left: var(--space-10); }
+
+.form-error {
+  font-family: var(--font-mono);
+  color: var(--pepperoni);
+  font-size: var(--fs-sm);
+  margin: var(--space-2) 0 0;
+}
+.form-error::before { content: '! '; }
+
+/* ---------------------------------------------------------------- gate */
+
+.gate {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background:
+    radial-gradient(circle at 30% 20%, rgb(255 45 120 / 0.2), transparent 45%),
+    radial-gradient(circle at 75% 80%, rgb(33 230 255 / 0.14), transparent 45%),
+    var(--void);
+}
+.gate::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgb(255 255 255 / 0.04) 0 1px,
+    transparent 1px 3px
+  );
+}
+.gate-card {
+  --o-edge: var(--edge);
+  --o-fill: var(--chassis);
+  width: min(440px, 100%);
+  padding: var(--space-10) var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  animation: boot var(--dur-3) var(--ease-snap);
+}
+.gate-card .overline { margin: 0; }
+.gate-title {
+  font-family: var(--font-display);
+  font-size: 44px;
+  line-height: 1.1;
+  margin: 0;
+  color: var(--neon);
+  text-transform: none;
+  letter-spacing: 0;
+  text-shadow: 0 0 10px rgb(255 45 120 / 0.7), 0 0 34px rgb(255 45 120 / 0.35);
+  animation: neon-buzz 7s infinite steps(1);
+}
+.gate-tag {
+  margin: 0;
+  font-size: var(--fs-lg);
+  line-height: var(--lh-snug);
+  color: var(--fg);
+  text-wrap: balance;
+}
+.gate-hint { color: var(--ink-dim); margin: 0; }
+.gate-card .btn { justify-content: center; }
+
+/* ---------------------------------------------------------------- home */
+
+.home-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+.home-head h2 { margin: var(--space-2) 0 0; }
+.home-head .overline { margin: 0; }
+
+.racha-list { display: flex; flex-direction: column; gap: var(--space-3); }
+.racha-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+.racha-card:hover { --o-edge: var(--neon); }
+.racha-card-main { min-width: 0; }
+.racha-card-main h3 { margin: var(--space-1) 0 0; font-size: var(--fs-h4); }
+.racha-card-main .overline {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+}
+.racha-card-side { display: flex; align-items: center; gap: var(--space-4); }
+.racha-total {
+  font-family: var(--font-mono);
+  font-size: var(--fs-lg);
+  color: var(--slime);
+  white-space: nowrap;
+}
+.card-arrow {
+  color: var(--neon);
+  transition: transform var(--dur-2) var(--ease);
+}
+.racha-card:hover .card-arrow { transform: translateX(5px); }
+
+.empty { text-align: center; padding: var(--space-12) var(--space-6); }
+.empty p { margin: 0; }
+.empty-sub { color: var(--ink-dim); margin-top: var(--space-2) !important; }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+@media (max-width: 560px) { .form-grid { grid-template-columns: 1fr; } }
+
+/* ---------------------------------------------------------------- room */
+
+.room { display: flex; flex-direction: column; gap: var(--space-5); }
+.room-loading { color: var(--ink-dim); font-family: var(--font-mono); }
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--wire);
+}
+.back-link:hover { color: #fff; }
+
+.room-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+.room-head h2 { margin: var(--space-2) 0 0; }
+.room-head .overline { margin: 0; }
+
+.room-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: var(--space-5);
+  align-items: start;
+}
+.room-main { display: flex; flex-direction: column; gap: var(--space-5); min-width: 0; }
+
+/* ------------------------------------------------------- a roda da pizza
+   A assinatura do app. "Racha" é literalmente dividir a pizza: cada fatia é
+   uma pessoa, e a fatia acende quando ela confirma (aberto) ou paga
+   (fechado). O miolo carrega o número que todo mundo veio ver — a Parte. */
+
+.room-figures {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: center;
+}
+.pizza {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+.pizza-wheel {
+  position: relative;
+  width: 172px;
+  height: 172px;
+  border-radius: 50%;
+  /* A casca: um anel fino, não uma moldura. */
+  box-shadow:
+    inset 0 0 0 3px var(--cheese),
+    inset 0 0 18px rgb(0 0 0 / 0.55),
+    0 0 26px rgb(255 194 51 / 0.16);
+}
+/* Os cortes do racha, do centro até a casca. */
+.pizza-wheel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: repeating-conic-gradient(
+    from -90deg,
+    transparent 0deg calc(var(--slice) - 2deg),
+    var(--void) calc(var(--slice) - 2deg) var(--slice)
+  );
+}
+.pizza-caption {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  text-align: center;
+}
+
+.figure-stack { display: flex; flex-direction: column; gap: var(--space-4); }
+.figure .overline { margin: 0 0 2px; }
+.figure-value {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-h4);
+  line-height: 1.1;
+  color: var(--fg);
+}
+.figure--highlight .figure-value {
+  font-size: var(--fs-h2);
+  color: var(--slime);
+}
+
+@media (max-width: 560px) {
+  .room-figures { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+  .figure-stack { flex-direction: row; gap: var(--space-6); flex-wrap: wrap; justify-content: center; }
+}
+
+/* ------------------------------------------------------------ pessoas */
+
+.participants-head .overline { margin: 0 0 var(--space-2); }
+.participant-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--edge);
+}
+.participant-row:last-child { border-bottom: none; }
+.participant-id { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
+.participant-name {
+  font-weight: var(--fw-medium);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.you-tag { color: var(--neon); font-weight: var(--fw-regular); }
+.org-tag {
+  --o-clip: var(--chamfer-sm);
+  --o-edge: var(--wire-dim);
+  --o-fill: var(--chassis);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--wire);
+  padding: 2px 7px;
+  white-space: nowrap;
+}
+.participant-side { display: flex; align-items: center; gap: var(--space-2); }
+
+/* Uma fatia: apagada até a pessoa confirmar. Contorno em clip-path não fecha
+   bem, então o estado é dado pelo preenchimento. */
+.dot {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  background: var(--edge-hot);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  transition: background var(--dur-2) var(--ease), filter var(--dur-2) var(--ease);
+}
+.dot--on {
+  background: var(--slime);
+}
+
+.paid-toggle {
+  --o-clip: var(--chamfer-sm);
+  --o-edge: var(--edge-hot);
+  --o-fill: var(--chassis);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  border: none;
+  color: var(--ink-dim);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all var(--dur-2) var(--ease);
+}
+.paid-toggle:hover { --o-edge: var(--slime-dim); color: var(--slime); }
+.paid-toggle--on { --o-edge: var(--slime); --o-fill: var(--slime); color: #0b1400; }
+.paid-badge {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  color: var(--cheese);
+}
+.paid-badge--on { color: var(--slime); }
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: none;
+  background: transparent;
+  color: var(--ink-faint);
+  cursor: pointer;
+  clip-path: var(--chamfer-sm);
+  transition: all var(--dur-2) var(--ease);
+}
+.icon-btn:hover { background: rgb(255 68 35 / 0.16); color: var(--pepperoni); }
+
+.room-actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+
+/* Escolha do destino dos pendentes na conclusão. */
+.conclude-choice {
+  border: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.conclude-choice legend {
+  padding: 0;
+  margin-bottom: var(--space-3);
+  color: var(--cheese);
+}
+.choice {
+  --o-clip: var(--chamfer-sm);
+  --o-edge: var(--edge);
+  --o-fill: var(--chassis-2);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  cursor: pointer;
+}
+.choice:hover { --o-edge: var(--edge-hot); }
+.choice--on { --o-edge: var(--slime); }
+.choice input { margin-top: 3px; accent-color: var(--slime); }
+.choice span { display: block; }
+.choice-label { font-size: var(--fs-sm); font-weight: var(--fw-semibold); }
+.choice-hint { font-size: var(--fs-xs); color: var(--ink-dim); }
+
+/* ------------------------------------------------------------- roleta
+   Quem confirmou entra na roda; uma pessoa desce. Mesma família visual da
+   roda da pizza, mas em magenta/ciano para não competir com o verde do
+   dinheiro — aqui não se paga nada, só se perde. */
+
+.roulette-zone {
+  --o-edge: #6b5116;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  text-align: center;
+}
+.roulette-zone .overline { margin: 0; }
+.roulette-zone .caption { margin: 0; max-width: 42ch; }
+.roulette-wait { margin: 0; color: var(--ink-dim); }
+
+.roulette {
+  position: relative;
+  width: 268px;
+  height: 268px;
+  max-width: 100%;
+  aspect-ratio: 1;
+}
+.roulette-pin {
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  z-index: 3;
+  width: 18px;
+  height: 22px;
+  margin-left: -9px;
+  background: var(--cheese);
+  clip-path: polygon(50% 100%, 0 0, 100% 0);
+}
+.roulette-wheel {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 3px var(--cheese);
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.12, 0.72, 0.12, 1);
+  will-change: transform;
+}
+/* Corte seco entre os nomes, na cor do fundo. */
+.roulette-wheel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: repeating-conic-gradient(
+    from -90deg,
+    transparent 0 calc(var(--slice, 360deg) - 2deg),
+    var(--void) calc(var(--slice, 360deg) - 2deg) var(--slice, 360deg)
+  );
+  pointer-events: none;
+}
+/* O rótulo ocupa o terço externo do raio: perto da casca ele tem largura de
+   sobra e nunca encontra o vizinho, que é onde nomes se atropelam. */
+.roulette-name {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 50%;
+  height: 0;
+  transform-origin: 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 16px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+  white-space: nowrap;
+  pointer-events: none;
+}
+/* Todo rótulo fica encostado na casca — inclusive o virado. Mandar o virado
+   para flex-start jogava o nome no centro, onde as fatias se estreitam e os
+   vizinhos se atropelam. O flip gira o texto, não troca ele de lado. */
+.roulette-name > span {
+  display: block;
+  max-width: 62px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.roulette-name--flip > span { transform: rotate(180deg); }
+.roulette-name--won { color: #0b1400; font-weight: var(--fw-bold); }
+
+.roulette-result {
+  margin: 0;
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--track-tight);
+  color: var(--slime);
+  text-wrap: balance;
+}
+.roulette-result.is-spinning {
+  color: var(--ink-faint);
+  font-size: var(--fs-h4);
+}
+
+/* ------------------------------------------------------------------ qr */
+
+.qr-zone {
+  --o-edge: #47661a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  text-align: center;
+}
+.qr-zone .overline { margin: 0; }
+.qr-lead { margin: 0; font-size: var(--fs-lg); text-wrap: balance; }
+.qr-img {
+  width: 232px;
+  height: 232px;
+  padding: var(--space-3);
+  background: #fff;
+  clip-path: var(--chamfer);
+}
+.code-box {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: center;
+}
+.code-text {
+  display: block;
+  width: 100%;
+  max-height: 74px;
+  overflow-y: auto;
+  word-break: break-all;
+  text-align: left;
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+  color: var(--wire);
+  background: var(--chassis-2);
+  box-shadow: inset 0 0 0 1px var(--edge);
+  padding: var(--space-3);
+}
+.qr-zone .caption { margin: 0; }
+.qr-zone .caption strong { font-family: var(--font-mono); color: var(--slime); }
+
+/* ---------------------------------------------------------------- chat
+   Segunda coluna da sala. Altura fixa por regra: a conversa rola dentro do
+   painel e nunca estica a página — o racha à esquerda tem que continuar
+   visível enquanto a galera conversa. */
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  position: sticky;
+  top: var(--space-5);
+  height: clamp(420px, calc(100dvh - 132px), 660px);
+}
+.chat-head .overline { margin: 0; }
+
+.chat-log {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-right: var(--space-2);
+  overscroll-behavior: contain;
+}
+.chat-empty { color: var(--ink-faint); margin: auto 0; text-align: center; }
+.chat-more {
+  align-self: center;
+  font-size: var(--fs-2xs);
+  padding: 3px 10px;
+}
+
+.chat-msg {
+  display: flex;
+  flex-direction: column;
+  max-width: 86%;
+  animation: msg-in var(--dur-2) var(--ease-snap);
+}
+.chat-msg--mine { align-self: flex-end; align-items: flex-end; }
+.chat-author {
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--wire);
+  margin: var(--space-1) 0 3px var(--space-2);
+}
+.chat-bubble {
+  --o-clip: var(--chamfer-sm);
+  --o-edge: var(--edge);
+  --o-fill: var(--chassis-2);
+  display: inline-flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+}
+.chat-msg--mine .chat-bubble { --o-edge: var(--neon-dim); --o-fill: #2a1024; }
+.chat-body {
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-width: 0;
+}
+.chat-time {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  color: var(--ink-faint);
+}
+
+.chat-compose { display: flex; gap: var(--space-2); align-items: flex-end; }
+.chat-input {
+  flex: 1;
+  resize: none;
+  min-height: 40px;
+  max-height: 120px;
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+  font-family: var(--font-sans);
+}
+.chat-send { padding: 10px 12px; flex-shrink: 0; }
+.chat-locked { margin: 0; text-align: center; }
+.chat-error { margin: 0; }
+
+@media (max-width: 900px) {
+  .room-layout { grid-template-columns: 1fr; }
+  .chat { position: static; height: min(64dvh, 520px); }
+}
+
+/* --------------------------------------------------------------- admin */
+
+.admin { display: flex; flex-direction: column; gap: var(--space-5); }
+.admin-gate {
+  max-width: 440px;
+  margin: var(--space-10) auto 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.admin-gate h2, .admin-gate p, .admin-gate .overline { margin: 0; }
+.admin-gate .overline { color: var(--pepperoni); }
+.admin-gate .btn { justify-content: center; }
+
+.admin-list { display: flex; flex-direction: column; gap: var(--space-3); }
+.admin-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+}
+.admin-row-main { min-width: 240px; flex: 1; }
+.admin-row-main .overline { margin: 0; }
+.admin-row-main h3 { margin: var(--space-1) 0; font-size: var(--fs-h4); }
+.admin-row-main h3 a:hover { color: var(--neon); }
+.admin-meta { margin: 0; }
+.admin-meta strong { font-family: var(--font-mono); color: var(--wire); font-weight: 400; }
+.admin-row-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+.admin-row-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); justify-content: flex-end; }
+
+/* --------------------------------------------------------------- misc */
+
+.notice-card { display: flex; flex-direction: column; gap: var(--space-3); align-items: flex-start; }
+.notice-card h2, .notice-card p { margin: 0; }
+.notice-card .overline { margin: 0; color: var(--cheese); }
+.notice-btn { margin-top: var(--space-2); }
+
+.name-prompt {
+  max-width: 440px;
+  margin: var(--space-10) auto 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.name-prompt h2, .name-prompt .overline { margin: 0; }
+.name-prompt .btn { justify-content: center; }
+
+/* ------------------------------------------------------------- diálogos */
+
+.dlg-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgb(3 3 8 / 0.78);
+  backdrop-filter: blur(3px);
+}
+.dlg-overlay[data-state='open'] { animation: fade-in var(--dur-2) var(--ease); }
+.dlg-overlay[data-state='closed'] { animation: fade-out var(--dur-1) var(--ease); }
+
+.dlg-content {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 51;
+  width: min(540px, calc(100vw - 2 * var(--space-4)));
+  max-height: calc(100dvh - 2 * var(--space-6));
+  overflow-y: auto;
+  transform: translate(-50%, -50%);
+  --o-edge: var(--edge-hot);
+  --o-fill: var(--chassis);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.dlg-content:focus { outline: none; }
+.dlg-content--alert { width: min(460px, calc(100vw - 2 * var(--space-4))); }
+.dlg-content[data-state='open'] { animation: dlg-in var(--dur-2) var(--ease-snap); }
+.dlg-content[data-state='closed'] { animation: dlg-out var(--dur-1) var(--ease); }
+
+.dlg-x {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: none;
+  background: transparent;
+  color: var(--ink-faint);
+  cursor: pointer;
+  clip-path: var(--chamfer-sm);
+  transition: all var(--dur-2) var(--ease);
+}
+.dlg-x:hover { background: rgb(255 68 35 / 0.16); color: var(--pepperoni); }
+
+.dlg-header { display: flex; flex-direction: column; gap: var(--space-2); }
+.dlg-title {
+  margin: 0;
+  font-size: var(--fs-h4);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding-right: var(--space-8);
+}
+.dlg-desc { margin: 0; font-size: var(--fs-sm); color: var(--ink-dim); }
+.dlg-footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-3); }
+
+.dlg-form { display: flex; flex-direction: column; gap: var(--space-5); }
+.dlg-content .form-grid { margin-top: var(--space-1); }
+
+/* ------------------------------------------------------------ animação */
+
+@keyframes scan { from { background-position-y: 0; } to { background-position-y: 3px; } }
+@keyframes ping {
+  0% { transform: scale(0.7); opacity: 0.5; }
+  70%, 100% { transform: scale(1.5); opacity: 0; }
+}
+@keyframes rotate { to { transform: rotate(360deg); } }
+@keyframes msg-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes boot {
+  from { opacity: 0; transform: translateY(10px) scaleY(0.98); }
+  to { opacity: 1; transform: none; }
+}
+/* Letreiro velho: pisca duas vezes e volta a queimar firme. */
+@keyframes neon-buzz {
+  0%, 88%, 91%, 94%, 100% { opacity: 1; }
+  89%, 92% { opacity: 0.35; }
+}
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes dlg-in {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.96); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes dlg-out {
+  from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  to { opacity: 0; transform: translate(-50%, -50%) scale(0.96); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .shell::before { animation: none; }
+}
