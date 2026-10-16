@@ -1,92 +1,93 @@
 /* ============================================================
-   RASHID — "TERMINAL DE ENTREGA"
-   Design system próprio. Substitui integralmente os tokens TROX.
+   RASHID — "MESA DA CANTINA"
+   Design system próprio.
 
-   Direção: um terminal de rua de madrugada. Chassi de máquina, chapa
-   chanfrada, faixa de risco, letreiro de neon. A energia vem de dois
-   lugares que qualquer um reconhece na mesa da engenharia às 23h — a
-   pizza e o energético — traduzidos em cor, não em desenhinho:
-   verde ácido de lata, magenta de letreiro, vermelho de calabresa,
-   amarelo de queijo derretido.
+   Direção: quente e casual, como cardápio de pizzaria de bairro. Papel
+   creme, terracota de forno a lenha, manjericão, mostarda de queijo
+   derretido. Nada brilha, nada pisca — a cor está ali para dizer o que
+   é ação, o que está pago e o que está pendente.
+
+   Segue o tema do sistema: claro por padrão, escuro em
+   prefers-color-scheme: dark.
    ============================================================ */
 
-@import url("https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&family=Monoton&family=Share+Tech+Mono&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Nunito:wght@400;500;600;700;800&display=swap");
 
 :root {
     /* -----------------------------------------------------------------
-       1. PALETA — seis cores nomeadas, cada uma com um trabalho
+       1. PALETA — claro
        ----------------------------------------------------------------- */
 
-    /* Superfícies: preto azulado de rua molhada, nunca preto puro.
-       Tudo opaco — chapa translúcida sobre fundo escuro vira lama. */
-    --void:      #06060c;  /* fundo da página */
-    --chassis:   #0d1019;  /* chapa dos painéis */
-    --chassis-2: #151a29;  /* sulco / campo de input */
-    --edge:      #2b3350;  /* hairline do chassi */
-    --edge-hot:  #46507d;  /* hairline em hover */
-    --dough:     #1b2133;  /* fatia apagada */
-    --slice-a:   #c4145c;  /* fatia ímpar da roleta */
-    --slice-b:   #182136;  /* fatia par da roleta */
-    --slice-c:   #0e6d80;  /* fecha a volta quando o total é ímpar */
-
-    /* Energia: verde ácido de lata — confirmação, "tô dentro", pago */
-    --slime:     #b4ff2e;
-    --slime-dim: #6f9c1c;
-
-    /* Letreiro: magenta — a ação principal, o "racha" */
-    --neon:      #ff2d78;
-    --neon-dim:  #a01048;
-
-    /* Fiação: ciano — links, quem organiza, informação */
-    --wire:      #21e6ff;
-    --wire-dim:  #12798a;
-
-    /* Calabresa: vermelho — destrutivo, cancelar, excluir */
-    --pepperoni: #ff4423;
-
-    /* Queijo: âmbar — pendente, fechado, atenção */
-    --cheese:    #ffc233;
+    /* Superfícies: papel creme, cartão branco-quente. */
+    --bg:          #faf5ee;  /* fundo da página */
+    --surface:     #fffdf9;  /* cartões e painéis */
+    --surface-2:   #f4ece1;  /* campo de input, áreas recuadas */
+    --border:      #e8dccb;
+    --border-strong: #d5c3ab;
 
     /* Tinta */
-    --ink:       #dfe3f2;
-    --ink-dim:   #8e93ad;
-    --ink-faint: #565b78;
+    --ink:       #2d231c;
+    --ink-dim:   #6e6056;
+    --ink-faint: #a29283;
 
-    /* Apelidos semânticos — usados pela camada de componentes */
-    --bg: var(--void);
-    --panel: var(--chassis);
-    --fg: var(--ink);
-    --muted-fg: var(--ink-dim);
-    --accent: var(--neon);
-    --success: var(--slime);
-    --warning: var(--cheese);
-    --danger: var(--pepperoni);
-    --ring: var(--wire);
+    /* Terracota: a ação principal, o "racha", links */
+    --accent:       #c4532d;
+    --accent-hover: #a9431f;
+    --accent-soft:  #fbe5da;
+    --on-accent:    #ffffff;
+
+    /* Manjericão: confirmado, pago, dinheiro */
+    --success:      #4c7a35;
+    --success-hover:#3e6629;
+    --success-soft: #e4efd9;
+    --on-success:   #ffffff;
+
+    /* Mostarda: pendente, fechado, atenção */
+    --warning:      #a86b12;
+    --warning-soft: #fbedd0;
+
+    /* Tomate: destrutivo, cancelar, excluir */
+    --danger:       #c0392b;
+    --danger-hover: #a32e22;
+    --danger-soft:  #fadbd5;
+
+    /* Pizza e roleta */
+    --pizza-on:  #eaa93a;   /* fatia acertada: queijo */
+    --pizza-off: #efe5d6;   /* fatia ainda crua: massa */
+    --crust:     #c98a4b;   /* casca */
+    --slice-a:   #f3cdb9;
+    --slice-b:   #fbf3e8;
+    --slice-c:   #f1dcaa;
+
+    --shadow-sm: 0 1px 2px rgb(60 40 20 / 0.06);
+    --shadow:    0 1px 2px rgb(60 40 20 / 0.05), 0 6px 18px -6px rgb(60 40 20 / 0.12);
+    --shadow-lg: 0 20px 50px -12px rgb(60 40 20 / 0.28);
+    --overlay:   rgb(45 35 28 / 0.42);
 
     /* -----------------------------------------------------------------
-       2. TIPOGRAFIA — três vozes
-       Monoton só no letreiro (uma palavra na tela inteira);
-       Chakra Petch, angulosa e técnica, carrega tudo que se lê;
-       Share Tech Mono para o que é dado: código PIX, id, hora, dinheiro.
+       2. TIPOGRAFIA
+       Fraunces, serifada macia, nos títulos — cara de cardápio;
+       Nunito, arredondada, em tudo que se lê; monoespaçada só para o
+       código PIX. Números usam algarismos tabulares da própria Nunito.
        ----------------------------------------------------------------- */
-    --font-display: "Monoton", cursive;
-    --font-sans: "Chakra Petch", ui-sans-serif, system-ui, sans-serif;
-    --font-mono: "Share Tech Mono", ui-monospace, Menlo, Consolas, monospace;
+    --font-display: "Fraunces", Georgia, serif;
+    --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
-    --fs-display: 64px;
-    --fs-h1:      44px;
-    --fs-h2:      34px;
-    --fs-h3:      26px;
+    --fs-display: 56px;
+    --fs-h1:      40px;
+    --fs-h2:      30px;
+    --fs-h3:      23px;
     --fs-h4:      19px;
     --fs-lg:      17px;
     --fs-body:    15px;
     --fs-sm:      14px;
-    --fs-xs:      12px;
-    --fs-2xs:     10px;
+    --fs-xs:      13px;
+    --fs-2xs:     12px;
 
-    --lh-tight:  1.02;
-    --lh-snug:   1.18;
-    --lh-normal: 1.5;
+    --lh-tight:  1.08;
+    --lh-snug:   1.22;
+    --lh-normal: 1.55;
 
     --fw-light: 300;
     --fw-regular: 400;
@@ -94,12 +95,11 @@
     --fw-semibold: 600;
     --fw-bold: 700;
 
-    --track-tight: -0.01em;
-    --track-wide: 0.14em;
-    --track-x-wide: 0.24em;
+    --track-tight: -0.015em;
+    --track-wide: 0.04em;
 
     /* -----------------------------------------------------------------
-       3. ESPAÇO / FORMA / LUZ
+       3. ESPAÇO / FORMA / MOVIMENTO
        ----------------------------------------------------------------- */
     --space-1: 4px;
     --space-2: 8px;
@@ -112,34 +112,66 @@
     --space-12: 48px;
     --space-16: 64px;
 
-    /* Nada é arredondado: o chassi é cortado. O chanfro é a assinatura
-       geométrica do sistema — canto superior esquerdo e inferior direito.
-       Usado com box-shadow inset no lugar de border, porque clip-path
-       recorta o inset e devolve uma "borda" chanfrada de verdade. */
-    --cut: 10px;
-    --cut-sm: 6px;
-    --chamfer: polygon(
-        var(--cut) 0, 100% 0,
-        100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%,
-        0 100%, 0 var(--cut)
-    );
-    --chamfer-sm: polygon(
-        var(--cut-sm) 0, 100% 0,
-        100% calc(100% - var(--cut-sm)), calc(100% - var(--cut-sm)) 100%,
-        0 100%, 0 var(--cut-sm)
-    );
+    --radius-sm: 8px;
+    --radius:    14px;
+    --radius-lg: 20px;
+    --radius-pill: 999px;
 
-    /* Glow via filter (drop-shadow segue o recorte; box-shadow externo não) */
-    --glow-neon: drop-shadow(0 0 10px rgb(255 45 120 / 0.55));
-    --glow-slime: drop-shadow(0 0 10px rgb(180 255 46 / 0.45));
-    --glow-wire: drop-shadow(0 0 10px rgb(33 230 255 / 0.45));
-
-    /* Movimento — rápido e seco, de máquina */
     --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
     --ease-snap: cubic-bezier(0.16, 1, 0.3, 1);
     --dur-1: 110ms;
     --dur-2: 200ms;
     --dur-3: 340ms;
+
+    color-scheme: light;
+}
+
+/* -----------------------------------------------------------------
+   PALETA — escuro: forno apagado, madeira e brasa
+   ----------------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg:          #1b1613;
+        --surface:     #241e1a;
+        --surface-2:   #2e2621;
+        --border:      #3a3029;
+        --border-strong: #4e4137;
+
+        --ink:       #f2e9df;
+        --ink-dim:   #b9aa9c;
+        --ink-faint: #85776b;
+
+        --accent:       #e07b55;
+        --accent-hover: #ea916f;
+        --accent-soft:  #3f261b;
+        --on-accent:    #1b1613;
+
+        --success:      #94bf77;
+        --success-hover:#a7cc8e;
+        --success-soft: #26311f;
+        --on-success:   #1b1613;
+
+        --warning:      #e3ab52;
+        --warning-soft: #3a2c16;
+
+        --danger:       #ec6f5f;
+        --danger-hover: #f2887a;
+        --danger-soft:  #3f1f1a;
+
+        --pizza-on:  #e2a341;
+        --pizza-off: #362d26;
+        --crust:     #a5703d;
+        --slice-a:   #6a3826;
+        --slice-b:   #2e2621;
+        --slice-c:   #5c4722;
+
+        --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
+        --shadow:    0 1px 2px rgb(0 0 0 / 0.3), 0 6px 18px -6px rgb(0 0 0 / 0.45);
+        --shadow-lg: 0 20px 50px -12px rgb(0 0 0 / 0.6);
+        --overlay:   rgb(10 8 6 / 0.62);
+
+        color-scheme: dark;
+    }
 }
 
 /* -----------------------------------------------------------------
@@ -147,10 +179,9 @@
    ----------------------------------------------------------------- */
 html {
     font-family: var(--font-sans);
-    color: var(--fg);
+    color: var(--ink);
     background: var(--bg);
-    color-scheme: dark;
-    accent-color: var(--slime);
+    accent-color: var(--accent);
 }
 body {
     font-size: var(--fs-body);
@@ -159,67 +190,58 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-h1, .h1 {
-    font-size: var(--fs-h1);
-    line-height: var(--lh-tight);
-    font-weight: var(--fw-bold);
-    letter-spacing: var(--track-tight);
-    text-transform: uppercase;
-    text-wrap: balance;
-}
-h2, .h2 {
-    font-size: var(--fs-h2);
-    line-height: var(--lh-snug);
-    font-weight: var(--fw-bold);
+h1, .h1, h2, .h2, h3, .h3 {
+    font-family: var(--font-display);
     letter-spacing: var(--track-tight);
     text-wrap: balance;
 }
-h3, .h3 {
-    font-size: var(--fs-h3);
-    line-height: var(--lh-snug);
-    font-weight: var(--fw-semibold);
-    text-transform: uppercase;
-    letter-spacing: 0.01em;
-}
+h1, .h1 { font-size: var(--fs-h1); line-height: var(--lh-tight); font-weight: var(--fw-semibold); }
+h2, .h2 { font-size: var(--fs-h2); line-height: var(--lh-snug); font-weight: var(--fw-semibold); }
+h3, .h3 { font-size: var(--fs-h3); line-height: var(--lh-snug); font-weight: var(--fw-semibold); }
 h4, .h4 {
+    font-family: var(--font-sans);
     font-size: var(--fs-h4);
     line-height: var(--lh-snug);
-    font-weight: var(--fw-semibold);
+    font-weight: var(--fw-bold);
 }
 p, .body { font-size: var(--fs-body); line-height: var(--lh-normal); text-wrap: pretty; }
 .body-lg { font-size: var(--fs-lg); line-height: var(--lh-normal); }
 .body-sm { font-size: var(--fs-sm); line-height: var(--lh-normal); }
-.caption { font-size: var(--fs-xs); line-height: var(--lh-normal); color: var(--muted-fg); }
+.caption { font-size: var(--fs-xs); line-height: var(--lh-normal); color: var(--ink-dim); }
 
-/* Etiqueta de painel: caixa alta, monoespaçada, bem espaçada — o rótulo
-   gravado na chapa acima de cada módulo. */
+/* Rótulo pequeno acima de cada bloco. */
 .overline {
-    font-family: var(--font-mono);
-    font-size: var(--fs-xs);
-    letter-spacing: var(--track-x-wide);
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-bold);
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--ink-faint);
 }
 
 .display {
+    font-family: var(--font-display);
     font-size: var(--fs-display);
-    font-weight: var(--fw-bold);
-    line-height: 0.95;
+    font-weight: var(--fw-semibold);
+    line-height: 1;
     letter-spacing: var(--track-tight);
-    text-transform: uppercase;
 }
 
 code, .mono {
     font-family: var(--font-mono);
-    font-size: 0.95em;
-    color: var(--wire);
-    background: var(--chassis-2);
-    padding: 0.05em 0.35em;
+    font-size: 0.9em;
+    color: var(--ink);
+    background: var(--surface-2);
+    padding: 0.1em 0.4em;
+    border-radius: 6px;
 }
 
-::selection { background: var(--neon); color: #fff; }
+::selection { background: var(--accent-soft); color: var(--ink); }
 
-::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--edge-hot); }
-::-webkit-scrollbar-thumb:hover { background: var(--wire-dim); }
+::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: var(--radius-pill);
+    border: 2px solid var(--bg);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--ink-faint); }

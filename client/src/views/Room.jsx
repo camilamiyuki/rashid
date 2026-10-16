@@ -395,7 +395,7 @@ function RunnerRoulette({ state, myPid, isOrganizer, onDraw }) {
 
   const runner = state.participants.find((p) => p.id === state.runnerId);
   const winnerIdx = indexOf(state.runnerId);
-  // A fatia vencedora só acende quando a roda para: o verde é a revelação.
+  // A fatia vencedora só acende quando a roda para: a cor é a revelação.
   const settled = winnerIdx >= 0 && !spinning;
   const wedges = candidates
     .map((p, i) => {
@@ -407,7 +407,7 @@ function RunnerRoulette({ state, myPid, isOrganizer, onDraw }) {
           : i % 2
             ? 'var(--slice-a)'
             : 'var(--slice-b)';
-      const color = settled && i === winnerIdx ? 'var(--slime)' : alt;
+      const color = settled && i === winnerIdx ? 'var(--accent)' : alt;
       return `${color} ${i * step}deg ${(i + 1) * step}deg`;
     })
     .join(', ');
@@ -812,7 +812,7 @@ function PizzaDial({ slices, lit, caption }) {
   const n = Math.max(slices, 1);
   const step = 360 / n;
   const wedges = Array.from({ length: n }, (_, i) => {
-    const color = i < lit ? 'var(--slime)' : 'var(--dough)';
+    const color = i < lit ? 'var(--pizza-on)' : 'var(--pizza-off)';
     return `${color} ${i * step}deg ${(i + 1) * step}deg`;
   }).join(', ');
 

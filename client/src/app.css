@@ -1,63 +1,21 @@
 /* Rashid — camada de componentes sobre os tokens de theme.css.
-   Regra geométrica única: nada é arredondado, tudo é chanfrado. O contorno
-   de quem é chanfrado vem do par de chapas descrito em "base" — box-shadow
-   inset deixaria justamente os cantos cortados sem contorno. */
+   Forma: cantos arredondados, borda fina e sombra leve. Nenhum brilho. */
 
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--void); }
+body { margin: 0; background: var(--bg); }
 a { color: inherit; text-decoration: none; }
 ul { list-style: none; margin: 0; padding: 0; }
 button { font: inherit; }
 img { max-width: 100%; }
-:focus-visible { outline: 2px solid var(--wire); outline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* ------------------------------------------------------------ atmosfera
-   Vidro de CRT sujo por cima de tudo: varredura, grão e vinheta. Fica em
-   3–5% de opacidade — some se você olhar de perto, sustenta a cena se não. */
+/* --------------------------------------------------------------- shell */
 
-.shell::before,
-.shell::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 9999;
-}
-.shell::before {
-  background:
-    repeating-linear-gradient(
-      to bottom,
-      rgb(255 255 255 / 0.035) 0 1px,
-      transparent 1px 3px
-    );
-  animation: scan 8s linear infinite;
-}
-.shell::after {
-  background:
-    radial-gradient(
-      ellipse at 50% 40%,
-      transparent 40%,
-      rgb(0 0 0 / 0.55) 100%
-    );
-}
-
-/* Fundo da página: brilho de letreiro nos cantos + respingo de calabresa. */
 .shell {
   min-height: 100dvh;
   position: relative;
-  background:
-    radial-gradient(circle at 12% 0%, rgb(255 45 120 / 0.16), transparent 42%),
-    radial-gradient(circle at 88% 8%, rgb(33 230 255 / 0.12), transparent 40%),
-    radial-gradient(circle at 50% 100%, rgb(180 255 46 / 0.07), transparent 55%),
-    /* calabresa fora de foco, ao fundo */
-    radial-gradient(circle at 16% 64%, rgb(255 68 35 / 0.22), transparent 9%),
-    radial-gradient(circle at 78% 30%, rgb(255 68 35 / 0.16), transparent 7%),
-    radial-gradient(circle at 92% 82%, rgb(255 68 35 / 0.18), transparent 8%),
-    var(--void);
-  background-attachment: fixed;
+  background: var(--bg);
 }
-
-/* --------------------------------------------------------------- shell */
 
 .shell-header {
   position: sticky;
@@ -68,88 +26,58 @@ img { max-width: 100%; }
   justify-content: space-between;
   gap: var(--space-4);
   padding: var(--space-3) var(--space-6);
-  background: rgb(6 6 12 / 0.82);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--edge);
-}
-/* Faixa de risco de máquina: a única listra do sistema. */
-.shell-header::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -4px;
-  height: 3px;
-  background: repeating-linear-gradient(
-    -45deg,
-    var(--cheese) 0 6px,
-    transparent 6px 12px
-  );
-  opacity: 0.5;
+  border-bottom: 1px solid var(--border);
 }
 
 .brand { display: flex; align-items: baseline; gap: var(--space-2); }
 .brand-name {
   font-family: var(--font-display);
-  font-size: 26px;
+  font-size: 24px;
+  font-weight: var(--fw-bold);
   line-height: 1;
-  color: var(--neon);
-  text-shadow:
-    0 0 6px rgb(255 45 120 / 0.9),
-    0 0 22px rgb(255 45 120 / 0.5);
-  animation: neon-buzz 6s infinite steps(1);
+  letter-spacing: var(--track-tight);
+  color: var(--accent);
 }
-.brand-slash {
-  font-family: var(--font-mono);
-  font-size: var(--fs-lg);
-  color: var(--wire);
-}
-.brand-sub {
-  font-family: var(--font-mono);
-  font-size: var(--fs-2xs);
-  letter-spacing: var(--track-x-wide);
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-@media (max-width: 560px) { .brand-sub { display: none; } }
+.brand-slash { font-size: var(--fs-lg); color: var(--border-strong); }
+.brand-sub { font-size: var(--fs-sm); color: var(--ink-dim); }
+@media (max-width: 560px) { .brand-sub, .brand-slash { display: none; } }
 
 .shell-side { display: flex; align-items: center; gap: var(--space-4); }
 .admin-link {
-  font-family: var(--font-mono);
-  font-size: var(--fs-2xs);
-  letter-spacing: var(--track-wide);
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  padding: 3px 8px;
-  background: var(--chassis-2);
-  clip-path: var(--chamfer-sm);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--ink-dim);
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
   transition: color var(--dur-2) var(--ease), background var(--dur-2) var(--ease);
 }
-.admin-link:hover { color: var(--cheese); background: #2a2110; }
+.admin-link:hover { color: var(--ink); background: var(--surface-2); }
 
 .conn-dot {
   position: relative;
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   flex-shrink: 0;
-  background: var(--pepperoni);
-  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  border-radius: 50%;
+  background: var(--danger);
   transition: background var(--dur-2) var(--ease);
 }
-.conn-dot--on { background: var(--slime); }
+.conn-dot--on { background: var(--success); }
 .conn-dot--on::after {
   content: '';
   position: absolute;
-  inset: -5px;
-  background: var(--slime);
-  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
-  opacity: 0.35;
-  animation: ping 2.2s var(--ease) infinite;
+  inset: -4px;
+  border-radius: 50%;
+  background: var(--success);
+  opacity: 0.3;
+  animation: ping 2.4s var(--ease) infinite;
 }
 
 .container {
   position: relative;
-  z-index: 1;
   max-width: 780px;
   margin: 0 auto;
   padding: var(--space-10) var(--space-4) var(--space-16);
@@ -158,49 +86,17 @@ img { max-width: 100%; }
 
 /* ---------------------------------------------------------------- base */
 
-/* Contorno que acompanha o chanfro.
-   `box-shadow: inset` NÃO serve aqui: ele desenha o anel no retângulo e o
-   clip-path recorta justamente o trecho que cairia na diagonal, deixando os
-   dois cantos cortados sem contorno. A saída é empilhar duas chapas — o
-   elemento pintado na cor da borda e uma camada 1px menor por dentro com a
-   cor do painel. Como `z-index: -1` pinta depois do fundo do pai e antes do
-   conteúdo, os filhos não precisam saber de nada. */
 .card,
 .gate-card,
-.dlg-content,
-.chat-bubble,
-.org-tag,
-.paid-toggle,
-.choice,
-.btn-ghost,
-.btn-danger-ghost {
-  position: relative;
-  clip-path: var(--o-clip, var(--chamfer));
-  background: var(--o-edge);
+.dlg-content {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
 }
-.card::before,
-.gate-card::before,
-.dlg-content::before,
-.chat-bubble::before,
-.org-tag::before,
-.paid-toggle::before,
-.choice::before,
-.btn-ghost::before,
-.btn-danger-ghost::before {
-  content: '';
-  position: absolute;
-  inset: 1px;
-  z-index: -1;
-  clip-path: var(--o-clip, var(--chamfer));
-  background: var(--o-fill);
-  transition: background var(--dur-2) var(--ease);
-}
-
 .card {
-  --o-edge: var(--edge);
-  --o-fill: var(--chassis);
   padding: var(--space-5) var(--space-6);
-  transition: background var(--dur-2) var(--ease);
+  transition: border-color var(--dur-2) var(--ease), box-shadow var(--dur-2) var(--ease);
 }
 
 .btn {
@@ -209,97 +105,82 @@ img { max-width: 100%; }
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  padding: 9px var(--space-5);
-  clip-path: var(--chamfer-sm);
-  border: none;
+  padding: 10px var(--space-5);
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
   background: transparent;
   font-family: var(--font-sans);
   font-size: var(--fs-sm);
-  font-weight: var(--fw-semibold);
-  letter-spacing: var(--track-wide);
-  text-transform: uppercase;
+  font-weight: var(--fw-bold);
   cursor: pointer;
   white-space: nowrap;
   transition:
     background var(--dur-2) var(--ease),
+    border-color var(--dur-2) var(--ease),
     color var(--dur-2) var(--ease),
-    box-shadow var(--dur-2) var(--ease),
-    filter var(--dur-2) var(--ease),
     transform var(--dur-1) var(--ease);
 }
 .btn:active:not(:disabled) { transform: translateY(1px); }
-.btn:disabled { opacity: 0.35; cursor: not-allowed; }
-/* clip-path corta outline, então o foco vira anel interno. */
-.btn:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--wire); }
-.btn-sm { padding: 5px var(--space-3); font-size: var(--fs-xs); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-sm { padding: 6px var(--space-3); font-size: var(--fs-xs); }
 
-.btn-accent { background: var(--neon); color: #fff; }
-.btn-accent:hover:not(:disabled) { background: #ff5a95; filter: var(--glow-neon); }
+.btn-accent { background: var(--accent); color: var(--on-accent); }
+.btn-accent:hover:not(:disabled) { background: var(--accent-hover); }
 
-.btn-primary { background: var(--slime); color: #0b1400; }
-.btn-primary:hover:not(:disabled) { background: #c9ff5c; filter: var(--glow-slime); }
+.btn-primary { background: var(--success); color: var(--on-success); }
+.btn-primary:hover:not(:disabled) { background: var(--success-hover); }
 
 .btn-ghost {
-  --o-clip: var(--chamfer-sm);
-  --o-edge: var(--wire-dim);
-  --o-fill: var(--chassis);
-  background: var(--o-edge);
-  color: var(--wire);
+  background: var(--surface);
+  border-color: var(--border-strong);
+  color: var(--ink);
 }
-.btn-ghost:hover:not(:disabled) { --o-edge: var(--wire); --o-fill: #123040; color: #fff; }
+.btn-ghost:hover:not(:disabled) { background: var(--surface-2); }
 
-.btn-danger { background: var(--pepperoni); color: #fff; }
-.btn-danger:hover:not(:disabled) { background: #ff6247; }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-danger:hover:not(:disabled) { background: var(--danger-hover); }
 
 .btn-danger-ghost {
-  --o-clip: var(--chamfer-sm);
-  --o-edge: #6d2416;
-  --o-fill: var(--chassis);
-  background: var(--o-edge);
-  color: var(--pepperoni);
+  background: var(--surface);
+  border-color: color-mix(in srgb, var(--danger) 40%, var(--border));
+  color: var(--danger);
 }
-.btn-danger-ghost:hover:not(:disabled) { --o-edge: var(--pepperoni); --o-fill: #2c110b; }
+.btn-danger-ghost:hover:not(:disabled) { background: var(--danger-soft); border-color: var(--danger); }
 
 .chip {
   display: inline-block;
   padding: 3px 10px;
-  clip-path: var(--chamfer-sm);
-  font-family: var(--font-mono);
+  border-radius: var(--radius-pill);
   font-size: var(--fs-2xs);
-  letter-spacing: var(--track-wide);
-  text-transform: uppercase;
+  font-weight: var(--fw-bold);
   white-space: nowrap;
 }
-.chip--aberto { background: rgb(180 255 46 / 0.14); color: var(--slime); }
-.chip--fechado { background: rgb(255 194 51 / 0.14); color: var(--cheese); }
-.chip--concluido { background: rgb(142 147 173 / 0.12); color: var(--ink-dim); }
+.chip--aberto { background: var(--success-soft); color: var(--success); }
+.chip--fechado { background: var(--warning-soft); color: var(--warning); }
+.chip--concluido { background: var(--surface-2); color: var(--ink-dim); }
 
-.field { display: flex; flex-direction: column; gap: var(--space-2); }
+.field { display: flex; flex-direction: column; gap: 6px; }
 .field-label {
-  font-family: var(--font-mono);
-  font-size: var(--fs-2xs);
-  letter-spacing: var(--track-x-wide);
-  text-transform: uppercase;
-  color: var(--ink-faint);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--ink-dim);
 }
-/* Campo preenchido, sem contorno: <input> não renderiza ::before, então o
-   truque de duas chapas não se aplica. O foco vira uma barra na base. */
 .input {
   width: 100%;
-  border: none;
-  background: var(--chassis-2);
-  clip-path: var(--chamfer-sm);
-  color: var(--fg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
   font-family: var(--font-sans);
   font-size: var(--fs-body);
   padding: 10px var(--space-3);
-  transition: box-shadow var(--dur-2) var(--ease);
+  transition: border-color var(--dur-2) var(--ease), box-shadow var(--dur-2) var(--ease);
 }
 .input::placeholder { color: var(--ink-faint); }
 .input:focus {
   outline: none;
-  background: #1a2336;
-  box-shadow: inset 0 -2px 0 var(--wire);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .input-icon { position: relative; }
@@ -308,18 +189,17 @@ img { max-width: 100%; }
   left: var(--space-3);
   top: 50%;
   transform: translateY(-50%);
-  color: var(--wire);
+  color: var(--ink-faint);
   z-index: 1;
 }
 .input-icon .input { padding-left: var(--space-10); }
 
 .form-error {
-  font-family: var(--font-mono);
-  color: var(--pepperoni);
+  color: var(--danger);
   font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
   margin: var(--space-2) 0 0;
 }
-.form-error::before { content: '! '; }
 
 /* ---------------------------------------------------------------- gate */
 
@@ -328,49 +208,32 @@ img { max-width: 100%; }
   display: grid;
   place-items: center;
   padding: var(--space-4);
-  background:
-    radial-gradient(circle at 30% 20%, rgb(255 45 120 / 0.2), transparent 45%),
-    radial-gradient(circle at 75% 80%, rgb(33 230 255 / 0.14), transparent 45%),
-    var(--void);
-}
-.gate::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    to bottom,
-    rgb(255 255 255 / 0.04) 0 1px,
-    transparent 1px 3px
-  );
+  background: var(--bg);
 }
 .gate-card {
-  --o-edge: var(--edge);
-  --o-fill: var(--chassis);
   width: min(440px, 100%);
   padding: var(--space-10) var(--space-8);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  animation: boot var(--dur-3) var(--ease-snap);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  animation: rise var(--dur-3) var(--ease-snap);
 }
 .gate-card .overline { margin: 0; }
 .gate-title {
   font-family: var(--font-display);
-  font-size: 44px;
-  line-height: 1.1;
+  font-size: 48px;
+  font-weight: var(--fw-bold);
+  line-height: 1;
   margin: 0;
-  color: var(--neon);
-  text-transform: none;
-  letter-spacing: 0;
-  text-shadow: 0 0 10px rgb(255 45 120 / 0.7), 0 0 34px rgb(255 45 120 / 0.35);
-  animation: neon-buzz 7s infinite steps(1);
+  color: var(--accent);
 }
 .gate-tag {
   margin: 0;
   font-size: var(--fs-lg);
   line-height: var(--lh-snug);
-  color: var(--fg);
+  color: var(--ink);
   text-wrap: balance;
 }
 .gate-hint { color: var(--ink-dim); margin: 0; }
@@ -385,7 +248,7 @@ img { max-width: 100%; }
   gap: var(--space-4);
   margin-bottom: var(--space-6);
 }
-.home-head h2 { margin: var(--space-2) 0 0; }
+.home-head h2 { margin: var(--space-1) 0 0; }
 .home-head .overline { margin: 0; }
 
 .racha-list { display: flex; flex-direction: column; gap: var(--space-3); }
@@ -395,9 +258,15 @@ img { max-width: 100%; }
   justify-content: space-between;
   gap: var(--space-4);
 }
-.racha-card:hover { --o-edge: var(--neon); }
+.racha-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow); }
 .racha-card-main { min-width: 0; }
-.racha-card-main h3 { margin: var(--space-1) 0 0; font-size: var(--fs-h4); }
+.racha-card-main h3 {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-h4);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0;
+}
 .racha-card-main .overline {
   display: inline-flex;
   align-items: center;
@@ -406,16 +275,17 @@ img { max-width: 100%; }
 }
 .racha-card-side { display: flex; align-items: center; gap: var(--space-4); }
 .racha-total {
-  font-family: var(--font-mono);
   font-size: var(--fs-lg);
-  color: var(--slime);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
   white-space: nowrap;
 }
 .card-arrow {
-  color: var(--neon);
-  transition: transform var(--dur-2) var(--ease);
+  color: var(--ink-faint);
+  transition: transform var(--dur-2) var(--ease), color var(--dur-2) var(--ease);
 }
-.racha-card:hover .card-arrow { transform: translateX(5px); }
+.racha-card:hover .card-arrow { transform: translateX(4px); color: var(--accent); }
 
 .empty { text-align: center; padding: var(--space-12) var(--space-6); }
 .empty p { margin: 0; }
@@ -427,19 +297,17 @@ img { max-width: 100%; }
 /* ---------------------------------------------------------------- room */
 
 .room { display: flex; flex-direction: column; gap: var(--space-5); }
-.room-loading { color: var(--ink-dim); font-family: var(--font-mono); }
+.room-loading { color: var(--ink-dim); }
 
 .back-link {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  font-family: var(--font-mono);
-  font-size: var(--fs-xs);
-  letter-spacing: var(--track-wide);
-  text-transform: uppercase;
-  color: var(--wire);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--ink-dim);
 }
-.back-link:hover { color: #fff; }
+.back-link:hover { color: var(--accent); }
 
 .room-head {
   display: flex;
@@ -447,7 +315,7 @@ img { max-width: 100%; }
   justify-content: space-between;
   gap: var(--space-4);
 }
-.room-head h2 { margin: var(--space-2) 0 0; }
+.room-head h2 { margin: var(--space-1) 0 0; }
 .room-head .overline { margin: 0; }
 
 .room-layout {
@@ -459,9 +327,8 @@ img { max-width: 100%; }
 .room-main { display: flex; flex-direction: column; gap: var(--space-5); min-width: 0; }
 
 /* ------------------------------------------------------- a roda da pizza
-   A assinatura do app. "Racha" é literalmente dividir a pizza: cada fatia é
-   uma pessoa, e a fatia acende quando ela confirma (aberto) ou paga
-   (fechado). O miolo carrega o número que todo mundo veio ver — a Parte. */
+   Cada participante é uma fatia; a fatia ganha queijo quando a pessoa
+   confirma (aberto) ou paga (fechado). */
 
 .room-figures {
   display: grid;
@@ -479,16 +346,11 @@ img { max-width: 100%; }
 }
 .pizza-wheel {
   position: relative;
-  width: 172px;
-  height: 172px;
+  width: 168px;
+  height: 168px;
   border-radius: 50%;
-  /* A casca: um anel fino, não uma moldura. */
-  box-shadow:
-    inset 0 0 0 3px var(--cheese),
-    inset 0 0 18px rgb(0 0 0 / 0.55),
-    0 0 26px rgb(255 194 51 / 0.16);
+  box-shadow: 0 0 0 6px var(--crust), var(--shadow);
 }
-/* Os cortes do racha, do centro até a casca. */
 .pizza-wheel::after {
   content: '';
   position: absolute;
@@ -496,15 +358,13 @@ img { max-width: 100%; }
   border-radius: 50%;
   background: repeating-conic-gradient(
     from -90deg,
-    transparent 0deg calc(var(--slice) - 2deg),
-    var(--void) calc(var(--slice) - 2deg) var(--slice)
+    transparent 0deg calc(var(--slice) - 1.5deg),
+    var(--surface) calc(var(--slice) - 1.5deg) var(--slice)
   );
 }
 .pizza-caption {
-  font-family: var(--font-mono);
+  margin-top: var(--space-2);
   font-size: var(--fs-xs);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   color: var(--ink-dim);
   text-align: center;
 }
@@ -513,14 +373,17 @@ img { max-width: 100%; }
 .figure .overline { margin: 0 0 2px; }
 .figure-value {
   margin: 0;
-  font-family: var(--font-mono);
   font-size: var(--fs-h4);
-  line-height: 1.1;
-  color: var(--fg);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+  color: var(--ink);
 }
 .figure--highlight .figure-value {
-  font-size: var(--fs-h2);
-  color: var(--slime);
+  font-family: var(--font-display);
+  font-size: var(--fs-h1);
+  font-weight: var(--fw-semibold);
+  color: var(--accent);
 }
 
 @media (max-width: 560px) {
@@ -537,86 +400,77 @@ img { max-width: 100%; }
   justify-content: space-between;
   gap: var(--space-3);
   padding: var(--space-3) 0;
-  border-bottom: 1px solid var(--edge);
+  border-bottom: 1px solid var(--border);
 }
 .participant-row:last-child { border-bottom: none; }
 .participant-id { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
 .participant-name {
-  font-weight: var(--fw-medium);
+  font-weight: var(--fw-semibold);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.you-tag { color: var(--neon); font-weight: var(--fw-regular); }
+.you-tag { color: var(--ink-faint); font-weight: var(--fw-regular); }
 .org-tag {
-  --o-clip: var(--chamfer-sm);
-  --o-edge: var(--wire-dim);
-  --o-fill: var(--chassis);
-  font-family: var(--font-mono);
   font-size: var(--fs-2xs);
-  letter-spacing: var(--track-wide);
-  text-transform: uppercase;
-  color: var(--wire);
-  padding: 2px 7px;
+  font-weight: var(--fw-bold);
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: var(--radius-pill);
+  padding: 2px 9px;
   white-space: nowrap;
 }
 .participant-side { display: flex; align-items: center; gap: var(--space-2); }
 
-/* Uma fatia: apagada até a pessoa confirmar. Contorno em clip-path não fecha
-   bem, então o estado é dado pelo preenchimento. */
 .dot {
   flex-shrink: 0;
-  width: 12px;
-  height: 12px;
-  background: var(--edge-hot);
-  clip-path: polygon(50% 0, 100% 100%, 0 100%);
-  transition: background var(--dur-2) var(--ease), filter var(--dur-2) var(--ease);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--border-strong);
+  transition: background var(--dur-2) var(--ease), box-shadow var(--dur-2) var(--ease);
 }
-.dot--on {
-  background: var(--slime);
-}
+.dot--on { background: var(--success); box-shadow: none; }
 
 .paid-toggle {
-  --o-clip: var(--chamfer-sm);
-  --o-edge: var(--edge-hot);
-  --o-fill: var(--chassis);
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  border: none;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
   color: var(--ink-dim);
-  font-family: var(--font-mono);
   font-size: var(--fs-xs);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 4px 10px;
+  font-weight: var(--fw-bold);
+  padding: 4px 12px;
   cursor: pointer;
   transition: all var(--dur-2) var(--ease);
 }
-.paid-toggle:hover { --o-edge: var(--slime-dim); color: var(--slime); }
-.paid-toggle--on { --o-edge: var(--slime); --o-fill: var(--slime); color: #0b1400; }
+.paid-toggle:hover { border-color: var(--success); color: var(--success); }
+.paid-toggle--on,
+.paid-toggle--on:hover { border-color: var(--success); background: var(--success); color: var(--on-success); }
 .paid-badge {
-  font-family: var(--font-mono);
   font-size: var(--fs-xs);
-  text-transform: uppercase;
-  color: var(--cheese);
+  font-weight: var(--fw-bold);
+  color: var(--warning);
 }
-.paid-badge--on { color: var(--slime); }
+.paid-badge--on { color: var(--success); }
 
 .icon-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border: none;
+  border-radius: 50%;
   background: transparent;
   color: var(--ink-faint);
   cursor: pointer;
-  clip-path: var(--chamfer-sm);
   transition: all var(--dur-2) var(--ease);
 }
-.icon-btn:hover { background: rgb(255 68 35 / 0.16); color: var(--pepperoni); }
+.icon-btn:hover { background: var(--danger-soft); color: var(--danger); }
 
 .room-actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
 
@@ -632,32 +486,30 @@ img { max-width: 100%; }
 .conclude-choice legend {
   padding: 0;
   margin-bottom: var(--space-3);
-  color: var(--cheese);
+  color: var(--warning);
 }
 .choice {
-  --o-clip: var(--chamfer-sm);
-  --o-edge: var(--edge);
-  --o-fill: var(--chassis-2);
   display: flex;
   align-items: flex-start;
   gap: var(--space-3);
   padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
   cursor: pointer;
+  transition: border-color var(--dur-2) var(--ease), background var(--dur-2) var(--ease);
 }
-.choice:hover { --o-edge: var(--edge-hot); }
-.choice--on { --o-edge: var(--slime); }
-.choice input { margin-top: 3px; accent-color: var(--slime); }
+.choice:hover { border-color: var(--border-strong); }
+.choice--on { border-color: var(--accent); background: var(--accent-soft); }
+.choice input { margin-top: 3px; accent-color: var(--accent); }
 .choice span { display: block; }
-.choice-label { font-size: var(--fs-sm); font-weight: var(--fw-semibold); }
+.choice-label { font-size: var(--fs-sm); font-weight: var(--fw-bold); }
 .choice-hint { font-size: var(--fs-xs); color: var(--ink-dim); }
 
 /* ------------------------------------------------------------- roleta
-   Quem confirmou entra na roda; uma pessoa desce. Mesma família visual da
-   roda da pizza, mas em magenta/ciano para não competir com o verde do
-   dinheiro — aqui não se paga nada, só se perde. */
+   Quem confirmou entra na roda; uma pessoa desce. */
 
 .roulette-zone {
-  --o-edge: #6b5116;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -677,25 +529,24 @@ img { max-width: 100%; }
 }
 .roulette-pin {
   position: absolute;
-  top: -2px;
+  top: -4px;
   left: 50%;
   z-index: 3;
   width: 18px;
   height: 22px;
   margin-left: -9px;
-  background: var(--cheese);
+  background: var(--ink);
   clip-path: polygon(50% 100%, 0 0, 100% 0);
 }
 .roulette-wheel {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  box-shadow: inset 0 0 0 3px var(--cheese);
+  box-shadow: 0 0 0 5px var(--crust), var(--shadow);
   transition-property: transform;
   transition-timing-function: cubic-bezier(0.12, 0.72, 0.12, 1);
   will-change: transform;
 }
-/* Corte seco entre os nomes, na cor do fundo. */
 .roulette-wheel::after {
   content: '';
   position: absolute;
@@ -703,13 +554,12 @@ img { max-width: 100%; }
   border-radius: 50%;
   background: repeating-conic-gradient(
     from -90deg,
-    transparent 0 calc(var(--slice, 360deg) - 2deg),
-    var(--void) calc(var(--slice, 360deg) - 2deg) var(--slice, 360deg)
+    transparent 0 calc(var(--slice, 360deg) - 1.5deg),
+    var(--surface) calc(var(--slice, 360deg) - 1.5deg) var(--slice, 360deg)
   );
   pointer-events: none;
 }
-/* O rótulo ocupa o terço externo do raio: perto da casca ele tem largura de
-   sobra e nunca encontra o vizinho, que é onde nomes se atropelam. */
+/* O rótulo ocupa o terço externo do raio, onde há largura de sobra. */
 .roulette-name {
   position: absolute;
   left: 50%;
@@ -721,17 +571,12 @@ img { max-width: 100%; }
   align-items: center;
   justify-content: flex-end;
   padding-right: 16px;
-  font-family: var(--font-mono);
   font-size: var(--fs-xs);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #fff;
+  font-weight: var(--fw-bold);
+  color: var(--ink);
   white-space: nowrap;
   pointer-events: none;
 }
-/* Todo rótulo fica encostado na casca — inclusive o virado. Mandar o virado
-   para flex-start jogava o nome no centro, onde as fatias se estreitam e os
-   vizinhos se atropelam. O flip gira o texto, não troca ele de lado. */
 .roulette-name > span {
   display: block;
   max-width: 62px;
@@ -739,15 +584,14 @@ img { max-width: 100%; }
   text-overflow: ellipsis;
 }
 .roulette-name--flip > span { transform: rotate(180deg); }
-.roulette-name--won { color: #0b1400; font-weight: var(--fw-bold); }
+.roulette-name--won { color: var(--on-accent); }
 
 .roulette-result {
   margin: 0;
+  font-family: var(--font-display);
   font-size: var(--fs-h3);
-  font-weight: var(--fw-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--track-tight);
-  color: var(--slime);
+  font-weight: var(--fw-semibold);
+  color: var(--accent);
   text-wrap: balance;
 }
 .roulette-result.is-spinning {
@@ -758,7 +602,6 @@ img { max-width: 100%; }
 /* ------------------------------------------------------------------ qr */
 
 .qr-zone {
-  --o-edge: #47661a;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -772,7 +615,8 @@ img { max-width: 100%; }
   height: 232px;
   padding: var(--space-3);
   background: #fff;
-  clip-path: var(--chamfer);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
 }
 .code-box {
   width: 100%;
@@ -788,27 +632,27 @@ img { max-width: 100%; }
   overflow-y: auto;
   word-break: break-all;
   text-align: left;
-  font-size: var(--fs-xs);
+  font-size: var(--fs-2xs);
   line-height: 1.5;
-  color: var(--wire);
-  background: var(--chassis-2);
-  box-shadow: inset 0 0 0 1px var(--edge);
+  color: var(--ink-dim);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
   padding: var(--space-3);
 }
 .qr-zone .caption { margin: 0; }
-.qr-zone .caption strong { font-family: var(--font-mono); color: var(--slime); }
+.qr-zone .caption strong { color: var(--ink); font-variant-numeric: tabular-nums; }
 
 /* ---------------------------------------------------------------- chat
-   Segunda coluna da sala. Altura fixa por regra: a conversa rola dentro do
-   painel e nunca estica a página — o racha à esquerda tem que continuar
-   visível enquanto a galera conversa. */
+   Segunda coluna da sala. Altura fixa: a conversa rola dentro do painel e
+   nunca estica a página. */
 
 .chat {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
   position: sticky;
-  top: var(--space-5);
+  top: calc(var(--space-5) + 56px);
   height: clamp(420px, calc(100dvh - 132px), 660px);
 }
 .chat-head .overline { margin: 0; }
@@ -838,23 +682,23 @@ img { max-width: 100%; }
 }
 .chat-msg--mine { align-self: flex-end; align-items: flex-end; }
 .chat-author {
-  font-family: var(--font-mono);
   font-size: var(--fs-2xs);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--wire);
+  font-weight: var(--fw-bold);
+  color: var(--ink-dim);
   margin: var(--space-1) 0 3px var(--space-2);
 }
 .chat-bubble {
-  --o-clip: var(--chamfer-sm);
-  --o-edge: var(--edge);
-  --o-fill: var(--chassis-2);
   display: inline-flex;
   align-items: flex-end;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
+  background: var(--surface-2);
+  border-radius: 16px 16px 16px 4px;
 }
-.chat-msg--mine .chat-bubble { --o-edge: var(--neon-dim); --o-fill: #2a1024; }
+.chat-msg--mine .chat-bubble {
+  background: var(--accent-soft);
+  border-radius: 16px 16px 4px 16px;
+}
 .chat-body {
   font-size: var(--fs-sm);
   line-height: var(--lh-normal);
@@ -864,8 +708,8 @@ img { max-width: 100%; }
 }
 .chat-time {
   flex-shrink: 0;
-  font-family: var(--font-mono);
   font-size: var(--fs-2xs);
+  font-variant-numeric: tabular-nums;
   color: var(--ink-faint);
 }
 
@@ -899,7 +743,7 @@ img { max-width: 100%; }
   gap: var(--space-4);
 }
 .admin-gate h2, .admin-gate p, .admin-gate .overline { margin: 0; }
-.admin-gate .overline { color: var(--pepperoni); }
+.admin-gate .overline { color: var(--danger); }
 .admin-gate .btn { justify-content: center; }
 
 .admin-list { display: flex; flex-direction: column; gap: var(--space-3); }
@@ -912,10 +756,16 @@ img { max-width: 100%; }
 }
 .admin-row-main { min-width: 240px; flex: 1; }
 .admin-row-main .overline { margin: 0; }
-.admin-row-main h3 { margin: var(--space-1) 0; font-size: var(--fs-h4); }
-.admin-row-main h3 a:hover { color: var(--neon); }
+.admin-row-main h3 {
+  margin: var(--space-1) 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-h4);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0;
+}
+.admin-row-main h3 a:hover { color: var(--accent); }
 .admin-meta { margin: 0; }
-.admin-meta strong { font-family: var(--font-mono); color: var(--wire); font-weight: 400; }
+.admin-meta strong { color: var(--ink); font-weight: var(--fw-bold); font-variant-numeric: tabular-nums; }
 .admin-row-side {
   display: flex;
   flex-direction: column;
@@ -928,7 +778,7 @@ img { max-width: 100%; }
 
 .notice-card { display: flex; flex-direction: column; gap: var(--space-3); align-items: flex-start; }
 .notice-card h2, .notice-card p { margin: 0; }
-.notice-card .overline { margin: 0; color: var(--cheese); }
+.notice-card .overline { margin: 0; color: var(--warning); }
 .notice-btn { margin-top: var(--space-2); }
 
 .name-prompt {
@@ -947,8 +797,8 @@ img { max-width: 100%; }
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: rgb(3 3 8 / 0.78);
-  backdrop-filter: blur(3px);
+  background: var(--overlay);
+  backdrop-filter: blur(2px);
 }
 .dlg-overlay[data-state='open'] { animation: fade-in var(--dur-2) var(--ease); }
 .dlg-overlay[data-state='closed'] { animation: fade-out var(--dur-1) var(--ease); }
@@ -962,8 +812,8 @@ img { max-width: 100%; }
   max-height: calc(100dvh - 2 * var(--space-6));
   overflow-y: auto;
   transform: translate(-50%, -50%);
-  --o-edge: var(--edge-hot);
-  --o-fill: var(--chassis);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
   padding: var(--space-6);
   display: flex;
   flex-direction: column;
@@ -981,24 +831,24 @@ img { max-width: 100%; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   border: none;
+  border-radius: 50%;
   background: transparent;
   color: var(--ink-faint);
   cursor: pointer;
-  clip-path: var(--chamfer-sm);
   transition: all var(--dur-2) var(--ease);
 }
-.dlg-x:hover { background: rgb(255 68 35 / 0.16); color: var(--pepperoni); }
+.dlg-x:hover { background: var(--surface-2); color: var(--ink); }
 
 .dlg-header { display: flex; flex-direction: column; gap: var(--space-2); }
 .dlg-title {
   margin: 0;
-  font-size: var(--fs-h4);
-  font-weight: var(--fw-bold);
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--track-tight);
   padding-right: var(--space-8);
 }
 .dlg-desc { margin: 0; font-size: var(--fs-sm); color: var(--ink-dim); }
@@ -1009,24 +859,18 @@ img { max-width: 100%; }
 
 /* ------------------------------------------------------------ animação */
 
-@keyframes scan { from { background-position-y: 0; } to { background-position-y: 3px; } }
 @keyframes ping {
-  0% { transform: scale(0.7); opacity: 0.5; }
-  70%, 100% { transform: scale(1.5); opacity: 0; }
+  0% { transform: scale(0.7); opacity: 0.45; }
+  70%, 100% { transform: scale(1.6); opacity: 0; }
 }
 @keyframes rotate { to { transform: rotate(360deg); } }
 @keyframes msg-in {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: none; }
 }
-@keyframes boot {
-  from { opacity: 0; transform: translateY(10px) scaleY(0.98); }
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: none; }
-}
-/* Letreiro velho: pisca duas vezes e volta a queimar firme. */
-@keyframes neon-buzz {
-  0%, 88%, 91%, 94%, 100% { opacity: 1; }
-  89%, 92% { opacity: 0.35; }
 }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes fade-out { from { opacity: 1; } to { opacity: 0; } }
@@ -1045,5 +889,4 @@ img { max-width: 100%; }
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .shell::before { animation: none; }
 }
