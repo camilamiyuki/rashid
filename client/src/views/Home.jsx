@@ -39,6 +39,11 @@ export default function Home({ socket }) {
         <div>
           <p className="overline">Lobby</p>
           <h2 className="h3">Rachas rolando agora</h2>
+          <p className="body-sm home-intro">
+            Crie um Racha para organizar um pedido coletivo ou entre em um
+            aberto. A Parte é uma previsão enquanto o Racha estiver aberto; ao
+            fechar, a cobrança PIX fica disponível.
+          </p>
         </div>
         <button className="btn btn-accent" onClick={() => setCreating(true)}>
           <Plus size={16} aria-hidden /> Novo racha

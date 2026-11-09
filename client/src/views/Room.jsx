@@ -9,6 +9,7 @@ import {
   Pencil,
   ArrowLeft,
   Dices,
+  Share2,
 } from 'lucide-react';
 import { call } from '../api.js';
 import { parseMoney, formatMoney } from '../money.js';
@@ -44,9 +45,12 @@ const STATUS_LABEL = {
 export default function Room({ socket, rachaId }) {
   const [state, setState] = useState(null);
   const [myPid, setMyPid] = useState(null);
+  const [organizerAlreadyJoined, setOrganizerAlreadyJoined] = useState(false);
   const [phase, setPhase] = useState('joining'); // joining | prompt | in | blocked | removed | deleted
   const [blockedMsg, setBlockedMsg] = useState('');
+  const [closeNotice, setCloseNotice] = useState(false);
   const joinedOnce = useRef(false);
+  const lastStatus = useRef(null);
 
   async function join(name) {
     const res = await call(socket, 'racha:join', { rachaId, name });
@@ -60,6 +64,15 @@ export default function Room({ socket, rachaId }) {
       setPhase('prompt');
       return res;
     }
+    setOrganizerAlreadyJoined(!!res.organizerAlreadyJoined);
+    if (
+      joinedOnce.current &&
+      lastStatus.current === 'aberto' &&
+      res.state?.status === 'fechado'
+    ) {
+      setCloseNotice(true);
+    }
+    lastStatus.current = res.state?.status ?? lastStatus.current;
     joinedOnce.current = true;
     // `participantId` null = espectador: vê a Cobrança e a conversa, não age.
     setMyPid(res.participantId);
@@ -72,7 +85,14 @@ export default function Room({ socket, rachaId }) {
     join(localStorage.getItem('rashid.name') ?? '');
 
     const onState = (s) => {
-      if (s.id === rachaId) setState(s);
+      if (s.id !== rachaId) return;
+      if (lastStatus.current === 'aberto' && s.status === 'fechado') {
+        setCloseNotice(true);
+      } else if (s.status === 'aberto') {
+        setCloseNotice(false);
+      }
+      lastStatus.current = s.status;
+      setState(s);
     };
     const onDeleted = ({ id }) => {
       if (id === rachaId) setPhase('deleted');
@@ -99,7 +119,17 @@ export default function Room({ socket, rachaId }) {
     }
   }, [state, myPid, phase]);
 
-  if (phase === 'prompt') return <NamePrompt onSubmit={(n) => join(n)} />;
+  if (phase === 'prompt')
+    return (
+      <NamePrompt
+        onSubmit={(n) => join(n)}
+        hint={
+          organizerAlreadyJoined
+            ? 'Já existe alguém com esse nome como Organizador. Use sobrenome ou apelido para diferenciar seu cadastro.'
+            : ''
+        }
+      />
+    );
   if (phase === 'blocked') return <Notice title="Sem entrada" body={blockedMsg} />;
   if (phase === 'removed')
     return (
@@ -130,6 +160,10 @@ export default function Room({ socket, rachaId }) {
       state={state}
       myPid={myPid}
       rachaId={rachaId}
+      organizerAlreadyJoined={organizerAlreadyJoined}
+      closeNotice={closeNotice && state.status === 'fechado'}
+      dismissCloseNotice={() => setCloseNotice(false)}
+      onEnterAsDifferentPerson={() => setPhase('prompt')}
       onEnter={enter}
     />
   );
@@ -137,12 +171,52 @@ export default function Room({ socket, rachaId }) {
 
 // ------------------------------------------------------------------ views
 
-function RoomView({ socket, state, myPid, rachaId, onEnter }) {
+function RoomView({
+  socket,
+  state,
+  myPid,
+  rachaId,
+  organizerAlreadyJoined,
+  closeNotice,
+  dismissCloseNotice,
+  onEnterAsDifferentPerson,
+  onEnter,
+}) {
   const me = state.participants.find((p) => p.id === myPid);
   const isOrganizer = state.organizerParticipantId === myPid;
   const organizer = state.participants.find((p) => p.isOrganizer);
   const [error, setError] = useState('');
   const [editing, setEditing] = useState(false);
+  const [shareFeedback, setShareFeedback] = useState('');
+
+  async function shareRacha() {
+    const url = window.location.href;
+    const shareData = {
+      title: `${state.name} · Rashid`,
+      text: `Entre no Racha "${state.name}" no Rashid.`,
+      url,
+    };
+
+    setShareFeedback('');
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        setShareFeedback('Link compartilhado.');
+        return;
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareFeedback('Link copiado. Cole no grupo do WhatsApp ou Teams.');
+    } catch {
+      setShareFeedback(
+        'Não foi possível copiar o link. Você pode copiá-lo pela barra do navegador.'
+      );
+    }
+  }
 
   const act = async (event, payload = {}) => {
     setError('');
@@ -168,10 +242,49 @@ function RoomView({ socket, state, myPid, rachaId, onEnter }) {
           </p>
           <h2 className="h3">{state.name}</h2>
         </div>
-        <span className={`chip chip--${state.status}`}>
-          {STATUS_LABEL[state.status]}
-        </span>
+        <div className="room-head-actions">
+          <button className="btn btn-ghost share-btn" onClick={shareRacha}>
+            <Share2 size={16} aria-hidden /> Compartilhar
+          </button>
+          <span className={`chip chip--${state.status}`}>
+            {STATUS_LABEL[state.status]}
+          </span>
+        </div>
       </div>
+      {shareFeedback && (
+        <p
+          className={`caption share-feedback ${shareFeedback.startsWith('Não foi') ? 'share-feedback--error' : ''}`}
+          role="status"
+          aria-live="polite"
+        >
+          {shareFeedback}
+        </p>
+      )}
+
+      {closeNotice && (
+        <div
+          className="close-notice"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          <div>
+            <p className="overline">Cobrança disponível</p>
+            <p className="body-sm">
+              O Racha foi fechado. A cobrança PIX e o valor final da sua Parte
+              já estão nesta tela.
+            </p>
+          </div>
+          <button
+            className="icon-btn"
+            type="button"
+            aria-label="Dispensar aviso de cobrança disponível"
+            onClick={dismissCloseNotice}
+          >
+            <X size={16} aria-hidden />
+          </button>
+        </div>
+      )}
 
       <div className="room-layout">
       <div className="room-main">
@@ -223,15 +336,29 @@ function RoomView({ socket, state, myPid, rachaId, onEnter }) {
 
       {!me && (
         <div className="card notice-card">
-          <p className="overline">Você está de fora</p>
-          <p className="body-sm">
-            {state.status === 'aberto'
-              ? 'Você ainda não entrou neste racha — entre para confirmar a sua parte.'
-              : 'Este racha fechou antes de você entrar. Dá pra ver a cobrança e a conversa, mas não dá mais para participar.'}
+          <p className="overline">
+            {organizerAlreadyJoined
+              ? 'Organizador já está neste Racha'
+              : 'Você está de fora'}
           </p>
-          {state.status === 'aberto' && (
+          <p className="body-sm">
+            {organizerAlreadyJoined
+              ? 'Esse nome já está como Organizador. Para evitar duplicar, este navegador entrou apenas como visualizador. Para editar ou fechar o Racha, use o navegador em que ele foi criado. Se for outra pessoa com o mesmo nome, entre com um sobrenome ou apelido.'
+              : state.status === 'aberto'
+                ? 'Você ainda não entrou neste racha — entre para confirmar a sua parte.'
+                : 'Este racha fechou antes de você entrar. Dá pra ver a cobrança e a conversa, mas não dá mais para participar.'}
+          </p>
+          {state.status === 'aberto' && !organizerAlreadyJoined && (
             <button className="btn btn-accent notice-btn" onClick={onEnter}>
               <Check size={16} aria-hidden /> Entrar no racha
+            </button>
+          )}
+          {state.status === 'aberto' && organizerAlreadyJoined && (
+            <button
+              className="btn btn-accent notice-btn"
+              onClick={onEnterAsDifferentPerson}
+            >
+              Entrar com outro nome
             </button>
           )}
         </div>
@@ -492,6 +619,7 @@ function RunnerRoulette({ state, myPid, isOrganizer, onDraw }) {
 function ChargePanel({ state, me, organizer }) {
   const [copied, setCopied] = useState(false);
   const iOwe = me && !me.isOrganizer;
+  const participantCount = state.participants.length;
 
   async function copy() {
     try {
@@ -513,6 +641,23 @@ function ChargePanel({ state, me, organizer }) {
             : `Pague sua parte de ${formatMoney(state.shareCents)} para ${organizer?.name}.`
           : `Cada pessoa paga ${formatMoney(state.shareCents)} para ${organizer?.name}.`}
       </p>
+      <div className="charge-calculation">
+        <p className="overline">Cálculo da Parte</p>
+        <p className="charge-equation">
+          <span>{formatMoney(state.totalCents)}</span>
+          <span aria-hidden="true">÷</span>
+          <span>
+            {participantCount}{' '}
+            {participantCount === 1 ? 'pessoa' : 'pessoas'}
+          </span>
+          <span aria-hidden="true">=</span>
+          <strong>{formatMoney(state.shareCents)} por pessoa</strong>
+        </p>
+        <p className="caption">
+          Divisão igual entre todos, incluindo o Organizador. O valor é
+          arredondado para cima ao centavo; a sobra fica com o Organizador.
+        </p>
+      </div>
       {state.qrDataUrl && (
         <img
           className="qr-img"
@@ -771,7 +916,7 @@ function ConfirmDialog({
   );
 }
 
-function NamePrompt({ onSubmit }) {
+function NamePrompt({ onSubmit, hint = '' }) {
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -788,6 +933,7 @@ function NamePrompt({ onSubmit }) {
     <form className="card name-prompt" onSubmit={submit}>
       <p className="overline">Quase lá</p>
       <h2 className="h4">Como você se chama?</h2>
+      {hint && <p className="body-sm">{hint}</p>}
       <label className="field">
         <span className="field-label">Seu nome</span>
         <input

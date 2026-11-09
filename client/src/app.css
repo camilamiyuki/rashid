@@ -250,6 +250,7 @@ img { max-width: 100%; }
 }
 .home-head h2 { margin: var(--space-1) 0 0; }
 .home-head .overline { margin: 0; }
+.home-intro { max-width: 520px; margin: var(--space-2) 0 0; color: var(--ink-dim); }
 
 .racha-list { display: flex; flex-direction: column; gap: var(--space-3); }
 .racha-card {
@@ -317,6 +318,20 @@ img { max-width: 100%; }
 }
 .room-head h2 { margin: var(--space-1) 0 0; }
 .room-head .overline { margin: 0; }
+.room-head-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+.share-btn { white-space: nowrap; }
+.share-feedback {
+  margin: calc(var(--space-3) * -1) 0 0 auto;
+  color: var(--success);
+  text-align: right;
+}
+.share-feedback--error { color: var(--danger); }
 
 .room-layout {
   display: grid;
@@ -387,6 +402,7 @@ img { max-width: 100%; }
 }
 
 @media (max-width: 560px) {
+  .room-head-actions { flex-direction: column; align-items: flex-end; }
   .room-figures { grid-template-columns: 1fr; justify-items: center; text-align: center; }
   .figure-stack { flex-direction: row; gap: var(--space-6); flex-wrap: wrap; justify-content: center; }
 }
@@ -610,6 +626,29 @@ img { max-width: 100%; }
 }
 .qr-zone .overline { margin: 0; }
 .qr-lead { margin: 0; font-size: var(--fs-lg); text-wrap: balance; }
+.charge-calculation {
+  width: min(100%, 540px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.charge-calculation .overline,
+.charge-calculation .caption { margin: 0; }
+.charge-equation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px 8px;
+  margin: 0;
+  font-size: var(--fs-body);
+  font-variant-numeric: tabular-nums;
+}
+.charge-equation strong { color: var(--accent); }
 .qr-img {
   width: 232px;
   height: 232px;
@@ -780,6 +819,19 @@ img { max-width: 100%; }
 .notice-card h2, .notice-card p { margin: 0; }
 .notice-card .overline { margin: 0; color: var(--warning); }
 .notice-btn { margin-top: var(--space-2); }
+.close-notice {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background: var(--success-soft);
+  border: 1px solid var(--success);
+  border-radius: var(--radius);
+}
+.close-notice .overline { margin: 0 0 var(--space-1); color: var(--success); }
+.close-notice p:last-child { margin: 0; }
+.close-notice .icon-btn { flex: 0 0 auto; }
 
 .name-prompt {
   max-width: 440px;

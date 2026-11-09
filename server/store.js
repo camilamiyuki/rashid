@@ -239,10 +239,11 @@ export function createRacha({ name, totalCents, pixKey, organizerName, clientKey
   return { rachaId, participantId };
 }
 
-/** Entra num racha. Três desfechos:
+/** Entra num racha. Desfechos:
  *  - participante (novo ou já existente): `participantId` preenchido;
  *  - espectador: racha fechado/concluído e a pessoa não estava nele — vê a
  *    Cobrança e a conversa, mas não age (`participantId` null);
+ *  - mesmo nome do Organizador em outro navegador: visualizador sem duplicar;
  *  - `needsName`: racha aberto e o navegador ainda não tem nome salvo. */
 export function joinRacha({ rachaId, clientKey, name }) {
   const r = mustGetRacha(rachaId);
@@ -255,10 +256,25 @@ export function joinRacha({ rachaId, clientKey, name }) {
   if (r.status !== 'aberto')
     return { participantId: null, state: getRachaState(r.id) };
   if (!String(name ?? '').trim()) return { needsName: true };
+  const cleanParticipantName = cleanName(name, 'Seu nome', 40);
+  const organizer = qPartByKey.get(r.id, r.organizer_key);
+  if (
+    organizer &&
+    organizer.name.toLocaleLowerCase('pt-BR') ===
+      cleanParticipantName.toLocaleLowerCase('pt-BR')
+  ) {
+    // Link aberto em outro navegador: reconhece o nome do Organizador como
+    // visualizador, sem duplicar a pessoa nem transferir poderes de edição.
+    return {
+      participantId: null,
+      organizerAlreadyJoined: true,
+      state: getRachaState(r.id),
+    };
+  }
   const participantId = newId();
   db.prepare(
     `INSERT INTO participants (id, racha_id, client_key, name) VALUES (?, ?, ?, ?)`
-  ).run(participantId, r.id, clientKey, cleanName(name, 'Seu nome', 40));
+  ).run(participantId, r.id, clientKey, cleanParticipantName);
   return { participantId, state: getRachaState(r.id) };
 }
 
