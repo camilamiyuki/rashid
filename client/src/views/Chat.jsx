@@ -6,7 +6,7 @@ const MESSAGE_MAX = 500;
 
 /** Chat ao vivo do racha. Histórico paginado por cursor + deltas via socket;
  *  nunca depende do estado do racha, que continua sendo o canal de rateio. */
-export default function Chat({ socket, rachaId, myPid, canSend }) {
+export default function Chat({ id, socket, rachaId, myPid, canSend }) {
   const [messages, setMessages] = useState([]);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -117,7 +117,7 @@ export default function Chat({ socket, rachaId, myPid, canSend }) {
   }
 
   return (
-    <section className="card chat">
+    <section id={id} className="card chat">
       <div className="chat-head">
         <p className="overline">Conversa</p>
       </div>

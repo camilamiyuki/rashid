@@ -10,6 +10,7 @@ import {
   ArrowLeft,
   Dices,
   Share2,
+  MessageCircle,
 } from 'lucide-react';
 import { call } from '../api.js';
 import { parseMoney, formatMoney } from '../money.js';
@@ -188,6 +189,8 @@ function RoomView({
   const [error, setError] = useState('');
   const [editing, setEditing] = useState(false);
   const [shareFeedback, setShareFeedback] = useState('');
+  const [chatOpen, setChatOpen] = useState(false);
+  const [reminderFeedback, setReminderFeedback] = useState('');
 
   async function shareRacha() {
     const url = window.location.href;
@@ -218,6 +221,24 @@ function RoomView({
     }
   }
 
+  async function copyReminder() {
+    const pending = state.participants.filter((p) => !p.isOrganizer && !p.paid);
+    const names = pending.map((p) => p.name).join(', ');
+    const amount = formatMoney(state.shareCents);
+    const message = [
+      `Oi, pessoal! Lembrete do Racha "${state.name}":`,
+      `${names} ${pending.length === 1 ? 'ainda precisa' : 'ainda precisam'} transferir ${amount}${pending.length > 1 ? ' cada' : ''} para ${organizer?.name}.`,
+      `Chave PIX: ${state.pixKey}`,
+    ].join('\n');
+
+    try {
+      await navigator.clipboard.writeText(message);
+      setReminderFeedback('Lembrete copiado. É só colar no grupo.');
+    } catch {
+      setReminderFeedback('Não foi possível copiar o lembrete.');
+    }
+  }
+
   const act = async (event, payload = {}) => {
     setError('');
     const res = await call(socket, event, { rachaId, ...payload });
@@ -228,6 +249,7 @@ function RoomView({
   const confirmedCount = state.participants.filter((p) => p.confirmed).length;
   const owers = state.participants.filter((p) => !p.isOrganizer);
   const paidCount = owers.filter((p) => p.paid).length;
+  const pendingParticipants = owers.filter((p) => !p.paid);
 
   return (
     <div className="room">
@@ -245,6 +267,16 @@ function RoomView({
         <div className="room-head-actions">
           <button className="btn btn-ghost share-btn" onClick={shareRacha}>
             <Share2 size={16} aria-hidden /> Compartilhar
+          </button>
+          <button
+            className="btn btn-ghost chat-toggle"
+            type="button"
+            aria-expanded={chatOpen}
+            aria-controls={chatOpen ? 'racha-chat' : undefined}
+            onClick={() => setChatOpen((open) => !open)}
+          >
+            <MessageCircle size={16} aria-hidden />
+            {chatOpen ? 'Fechar conversa' : 'Abrir conversa'}
           </button>
           <span className={`chip chip--${state.status}`}>
             {STATUS_LABEL[state.status]}
@@ -286,7 +318,7 @@ function RoomView({
         </div>
       )}
 
-      <div className="room-layout">
+      <div className={`room-layout ${chatOpen ? '' : 'room-layout--chat-closed'}`}>
       <div className="room-main">
       <div className="room-figures card">
         <PizzaDial
@@ -387,7 +419,17 @@ function RoomView({
               ? `${confirmedCount} de ${state.participants.length} confirmados`
               : `${paidCount} de ${owers.length} pagos`}
           </p>
+          {isOrganizer && state.status === 'fechado' && pendingParticipants.length > 0 && (
+            <button className="btn btn-ghost reminder-btn" onClick={copyReminder}>
+              <Copy size={15} aria-hidden /> Copiar lembrete PIX
+            </button>
+          )}
         </div>
+        {reminderFeedback && (
+          <p className="caption reminder-feedback" role="status" aria-live="polite">
+            {reminderFeedback}
+          </p>
+        )}
         <ul>
           {state.participants.map((p) => (
             <ParticipantRow
@@ -474,7 +516,9 @@ function RoomView({
       </div>
       </div>
 
-      <Chat socket={socket} rachaId={rachaId} myPid={myPid} canSend={!!me} />
+      {chatOpen && (
+        <Chat id="racha-chat" socket={socket} rachaId={rachaId} myPid={myPid} canSend={!!me} />
+      )}
       </div>
     </div>
   );

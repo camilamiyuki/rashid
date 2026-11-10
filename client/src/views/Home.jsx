@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, ArrowRight, Users } from 'lucide-react';
+import { Plus, ArrowRight, Users, Search } from 'lucide-react';
 import { call } from '../api.js';
 import { parseMoney, formatMoney } from '../money.js';
 import {
@@ -17,6 +17,7 @@ const STATUS_LABEL = { aberto: 'Aberto', fechado: 'Fechado' };
 export default function Home({ socket }) {
   const [rachas, setRachas] = useState([]);
   const [creating, setCreating] = useState(false);
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
     const refresh = () =>
@@ -33,16 +34,23 @@ export default function Home({ socket }) {
     };
   }, [socket]);
 
+  const normalizedQuery = query.trim().toLocaleLowerCase('pt-BR');
+  const visibleRachas = rachas.filter((r) =>
+    `${r.name} ${r.organizerName}`.toLocaleLowerCase('pt-BR').includes(normalizedQuery)
+  );
+  const openRachas = visibleRachas.filter((r) => r.status === 'aberto');
+  const closedRachas = visibleRachas.filter((r) => r.status === 'fechado');
+
   return (
     <div className="home">
       <div className="home-head">
         <div>
           <p className="overline">Lobby</p>
-          <h2 className="h3">Rachas rolando agora</h2>
+          <h2 className="h3">Rachas</h2>
           <p className="body-sm home-intro">
             Crie um Racha para organizar um pedido coletivo ou entre em um
             aberto. A Parte é uma previsão enquanto o Racha estiver aberto; ao
-            fechar, a cobrança PIX fica disponível.
+            fechar, a cobrança PIX e o status dos reembolsos continuam disponíveis.
           </p>
         </div>
         <button className="btn btn-accent" onClick={() => setCreating(true)}>
@@ -56,15 +64,52 @@ export default function Home({ socket }) {
         </DialogContent>
       </Dialog>
 
-      {rachas.length === 0 && (
+      {rachas.length === 0 ? (
         <div className="empty card">
-          <p className="body-lg">Nenhum racha aberto.</p>
+          <p className="body-lg">Nenhum Racha por aqui ainda.</p>
           <p className="body-sm empty-sub">
             Alguém precisa tomar a iniciativa da esfiha.
           </p>
         </div>
-      )}
+      ) : (
+        <>
+          <label className="lobby-search">
+            <Search size={17} aria-hidden />
+            <input
+              className="input lobby-search-input"
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Buscar por nome ou organizador"
+              aria-label="Buscar Rachas por nome ou organizador"
+            />
+          </label>
 
+          {visibleRachas.length === 0 ? (
+            <div className="empty card search-empty">
+              <p className="body-lg">Nenhum Racha encontrado.</p>
+              <p className="body-sm empty-sub">Tente outro nome ou organizador.</p>
+            </div>
+          ) : (
+            <div className="racha-sections">
+              {openRachas.length > 0 && (
+                <RachaSection title={`Abertos (${openRachas.length})`} rachas={openRachas} />
+              )}
+              {closedRachas.length > 0 && (
+                <RachaSection title={`Fechados (${closedRachas.length})`} rachas={closedRachas} />
+              )}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+function RachaSection({ title, rachas }) {
+  return (
+    <section className="racha-section" aria-label={title}>
+      <h3 className="overline racha-section-title">{title}</h3>
       <ul className="racha-list">
         {rachas.map((r) => (
           <li key={r.id}>
@@ -87,7 +132,7 @@ export default function Home({ socket }) {
           </li>
         ))}
       </ul>
-    </div>
+    </section>
   );
 }
 

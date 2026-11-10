@@ -252,6 +252,20 @@ img { max-width: 100%; }
 .home-head .overline { margin: 0; }
 .home-intro { max-width: 520px; margin: var(--space-2) 0 0; color: var(--ink-dim); }
 
+.lobby-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 520px;
+  margin-bottom: var(--space-6);
+  color: var(--ink-faint);
+}
+.lobby-search > svg { position: absolute; left: 14px; pointer-events: none; }
+.lobby-search-input { width: 100%; padding-left: 42px; }
+.racha-sections { display: flex; flex-direction: column; gap: var(--space-6); }
+.racha-section { display: flex; flex-direction: column; gap: var(--space-3); }
+.racha-section-title { margin: 0; }
+.search-empty { margin-top: var(--space-4); }
 .racha-list { display: flex; flex-direction: column; gap: var(--space-3); }
 .racha-card {
   display: flex;
@@ -326,6 +340,7 @@ img { max-width: 100%; }
   gap: var(--space-2);
 }
 .share-btn { white-space: nowrap; }
+.chat-toggle { white-space: nowrap; }
 .share-feedback {
   margin: calc(var(--space-3) * -1) 0 0 auto;
   color: var(--success);
@@ -339,6 +354,7 @@ img { max-width: 100%; }
   gap: var(--space-5);
   align-items: start;
 }
+.room-layout--chat-closed { grid-template-columns: minmax(0, 1fr); }
 .room-main { display: flex; flex-direction: column; gap: var(--space-5); min-width: 0; }
 
 /* ------------------------------------------------------- a roda da pizza
@@ -409,7 +425,17 @@ img { max-width: 100%; }
 
 /* ------------------------------------------------------------ pessoas */
 
-.participants-head .overline { margin: 0 0 var(--space-2); }
+.participants-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin-bottom: var(--space-2);
+}
+.participants-head .overline { margin: 0; }
+.reminder-btn { padding: 7px 11px; font-size: var(--fs-xs); }
+.reminder-feedback { margin: 0 0 var(--space-2); color: var(--success); }
 .participant-row {
   display: flex;
   align-items: center;
